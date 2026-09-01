@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0f05340-c247-479f-9d2b-0bd945a27fde" name="Changes" comment="" />
+    <list default="true" id="e0f05340-c247-479f-9d2b-0bd945a27fde" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mobile/lib/views/chat/conversational_sheet.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile/lib/views/chat/conversational_sheet.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mobile/lib/views/dashboard/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile/lib/views/dashboard/dashboard_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mobile/lib/views/dashboard/widgets/sea_state_gauge.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile/lib/views/dashboard/widgets/sea_state_gauge.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mobile/lib/views/dashboard/widgets/telemetry_hud_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile/lib/views/dashboard/widgets/telemetry_hud_bar.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -36,6 +42,9 @@
       </state>
     </system>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\Harshit\.gradle\wrapper\dists\gradle-9.4.1-bin\arn2x92ynaizyzdaamcbpbhtj\gradle-9.4.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.4.1" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4,
@@ -56,6 +65,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.17",

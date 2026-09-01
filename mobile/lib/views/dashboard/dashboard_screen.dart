@@ -6,6 +6,7 @@ import '../../data/models/geofence_model.dart';
 import '../../data/models/chat_message_model.dart';
 import 'widgets/telemetry_hud_bar.dart';
 import 'widgets/sea_state_gauge.dart';
+import '../map/tactical_radar_canvas.dart';
 import '../chat/conversational_sheet.dart';
 import '../chat/widgets/language_selector_sheet.dart';
 import '../offline/pre_voyage_screen.dart';
@@ -36,7 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   );
 
   bool _isRecording = false;
-  String _currentLanguageCode = 'en'; // Default to clean neutral English, switchable to any regional language
+  String _currentLanguageCode = 'en';
   String _currentLanguageName = 'English';
 
   late List<ChatMessageModel> _messages;
@@ -135,96 +136,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: AppColors.abyssBlack,
       body: Stack(
         children: [
-          // 1. TACTICAL MARINE NAVIGATION CANVAS (Clean Full-Bleed Map Background)
+          // 1. TACTICAL RADAR CANVAS (Animated Sweep, Range Rings, IMBL Border & PFZ)
           Positioned.fill(
-            child: Container(
-              color: AppColors.abyssBlack,
-              child: Stack(
-                children: [
-                  // Subtle Nautical Range Rings & Radar Grid
-                  Center(
-                    child: Container(
-                      width: 280,
-                      height: 280,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.radarCyan.withOpacity(0.12), width: 1),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Container(
-                      width: 170,
-                      height: 170,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.radarCyan.withOpacity(0.18), width: 1),
-                      ),
-                    ),
-                  ),
-                  // Own-Vessel Indicator with Course Heading Vector
-                  Center(
-                    child: Transform.rotate(
-                      angle: (82.0 * 3.1415926535 / 180.0), // 82 deg heading
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 2,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [AppColors.radarCyan, AppColors.radarCyan.withOpacity(0.0)],
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.deepOcean,
-                              border: Border.all(color: AppColors.radarCyan, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.radarCyan.withOpacity(0.4),
-                                  blurRadius: 12,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Icon(Icons.navigation, size: 22, color: AppColors.radarCyan),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: MediaQuery.of(context).size.height * 0.36,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Text(
-                        'PALK STRAIT • RAMESWARAM SECTOR',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary.withOpacity(0.6),
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: TacticalRadarCanvas(
+              vesselHeadingDeg: _telemetry.headingDeg,
+              speedKnots: _telemetry.speedKnots,
+              imblDistanceKm: _geofence.distanceToImblKm,
             ),
           ),
 
-          // 2. TOP PERSISTENT TELEMETRY HUD BAR (Clean 2-Row Layout with Integrated Actions)
+          // 2. TOP PERSISTENT TELEMETRY HUD BAR (Clean 2-Row Layout with GNSS & Actions)
           Positioned(
             top: 0,
             left: 0,
@@ -253,10 +174,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // 3. FLOATING WEATHER INSTRUMENT PILL (Docked Cleanly in Top Left under HUD)
+          // 3. FLOATING GLASSMORHPIC WEATHER INSTRUMENT
           Positioned(
             left: 14,
-            top: 106,
+            top: 104,
             child: const SafeArea(
               bottom: false,
               child: SeaStateGauge(
@@ -268,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // 4. COLLAPSIBLE CONVERSATIONAL VOICE DRAWER WITH GESTURE SWIPE DISMISS
+          // 4. COLLAPSIBLE CONVERSATIONAL VOICE DRAWER WITH GESTURE SWIPE
           Positioned(
             left: 0,
             right: 0,

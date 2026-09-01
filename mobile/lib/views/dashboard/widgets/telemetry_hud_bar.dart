@@ -16,22 +16,22 @@ class TelemetryHudBar extends StatelessWidget {
     required this.geofence,
     this.onLanguageTap,
     this.onOfflinePackTap,
-    this.currentLanguage = 'தமிழ்',
+    this.currentLanguage = 'English',
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.abyssBlack.withOpacity(0.92),
+        color: AppColors.abyssBlack.withOpacity(0.94),
         border: const Border(
-          bottom: BorderSide(color: AppColors.glassBorder, width: 1),
+          bottom: BorderSide(color: AppColors.glassBorder, width: 1.2),
         ),
         boxShadow: const [
           BoxShadow(
-            color: Colors.black45,
-            blurRadius: 10,
-            offset: Offset(0, 3),
+            color: Colors.black87,
+            blurRadius: 14,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -42,19 +42,24 @@ class TelemetryHudBar extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Row 1: Brand Identifier & Action Controls
+              // Row 1: Brand Identifier, GNSS Status & Actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // App Title & Problem Statement Tag
+                  // App Title, ISRO Tag & GNSS Lock
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                         decoration: BoxDecoration(
-                          color: AppColors.radarCyan.withOpacity(0.15),
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.radarCyan.withOpacity(0.25),
+                              AppColors.deepOcean,
+                            ],
+                          ),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.radarCyan.withOpacity(0.4)),
+                          border: Border.all(color: AppColors.radarCyan.withOpacity(0.5)),
                         ),
                         child: const Text(
                           'ORCA',
@@ -62,19 +67,49 @@ class TelemetryHudBar extends StatelessWidget {
                             fontSize: 13,
                             fontWeight: FontWeight.w900,
                             color: AppColors.radarCyan,
-                            letterSpacing: 1.2,
+                            letterSpacing: 1.4,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'ISRO 26176',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textSecondary,
-                          letterSpacing: 0.5,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.marineSurface.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(4),
                         ),
+                        child: const Text(
+                          'ISRO 26176',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      // GNSS 14 Sats Green Dot
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: AppColors.bioGreen,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'GNSS 14',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.bioGreen,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -87,11 +122,11 @@ class TelemetryHudBar extends StatelessWidget {
                         onTap: onOfflinePackTap,
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppColors.marineSurface.withOpacity(0.6),
+                            color: AppColors.deepOcean,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.glassBorder),
+                            border: Border.all(color: AppColors.radarCyan.withOpacity(0.35)),
                           ),
                           child: const Row(
                             children: [
@@ -101,8 +136,8 @@ class TelemetryHudBar extends StatelessWidget {
                                 '24h Pack',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.radarCyan,
                                 ),
                               ),
                             ],
@@ -117,9 +152,9 @@ class TelemetryHudBar extends StatelessWidget {
                         onTap: onLanguageTap,
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppColors.marineSurface.withOpacity(0.6),
+                            color: AppColors.marineSurface.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: AppColors.glassBorder),
                           ),
@@ -129,7 +164,7 @@ class TelemetryHudBar extends StatelessWidget {
                                 currentLanguage,
                                 style: const TextStyle(
                                   fontSize: 11,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary,
                                 ),
                               ),
@@ -145,32 +180,37 @@ class TelemetryHudBar extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              // Row 2: Clean Telemetry Strip (GPS, Speed, Heading, IMBL Alert)
+              // Row 2: Enhanced Telemetry Ribbon (GPS, Speed, Heading, IMBL Alert)
               Row(
                 children: [
-                  // GPS Coordinates
+                  // GPS Coordinates (Flexible and clean)
                   Expanded(
-                    flex: 4,
+                    flex: 11,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       decoration: BoxDecoration(
                         color: AppColors.deepOcean,
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.radarCyan.withOpacity(0.2)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.location_on_outlined, size: 13, color: AppColors.radarCyan),
-                          const SizedBox(width: 4),
+                          const Icon(Icons.my_location, size: 12, color: AppColors.radarCyan),
+                          const SizedBox(width: 5),
                           Expanded(
-                            child: Text(
-                              '${telemetry.latitude.toStringAsFixed(3)}°N, ${telemetry.longitude.toStringAsFixed(3)}°E',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '${telemetry.latitude.toStringAsFixed(3)}°N  ${telemetry.longitude.toStringAsFixed(3)}°E',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textPrimary,
+                                  letterSpacing: 0.2,
+                                ),
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -186,10 +226,11 @@ class TelemetryHudBar extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.deepOcean,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.bioGreen.withOpacity(0.3)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.navigation, size: 11, color: AppColors.bioGreen),
+                        const Icon(Icons.speed, size: 11, color: AppColors.bioGreen),
                         const SizedBox(width: 4),
                         Text(
                           '${telemetry.speedKnots.toStringAsFixed(1)} kts',
@@ -212,10 +253,11 @@ class TelemetryHudBar extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.deepOcean,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.textAccent.withOpacity(0.3)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.explore_outlined, size: 11, color: AppColors.textAccent),
+                        const Icon(Icons.explore, size: 11, color: AppColors.textAccent),
                         const SizedBox(width: 4),
                         Text(
                           '${telemetry.headingDeg.toStringAsFixed(0)}°',
@@ -270,6 +312,12 @@ class TelemetryHudBar extends StatelessWidget {
         color: pillColor.withOpacity(0.18),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: pillColor, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: pillColor.withOpacity(0.2),
+            blurRadius: 6,
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
