@@ -1,0 +1,43 @@
+{
+  "description": "Mock INCOIS PFZ advisory sample data for Palk Bay / Gulf of Mannar region",
+  "generated_for": "ORCA Hackathon (ISRO Problem 26176)",
+  "note": "This file is SAMPLE/REFERENCE DATA only. The live app uses the deterministic mock generator in app/services/incois_pfz.py. Replace with a real INCOIS API call when credentials are available (INCOIS_USE_MOCK=false).",
+  "advisories": [
+    {
+      "pfz_id": "PFZ-TN-SAMPLE-001",
+      "sector_name": "Palk Bay South",
+      "centroid": { "lat": 9.42, "lon": 79.55 },
+      "distance_km": 14.2,
+      "bearing_deg": 65.0,
+      "chlorophyll_mg_m3": 1.85,
+      "sst_gradient_celsius": 1.2,
+      "depth_m": 22.0,
+      "valid_until": "2026-08-28T06:00:00Z",
+      "source": "incois-sample"
+    },
+    {
+      "pfz_id": "PFZ-TN-SAMPLE-002",
+      "sector_name": "Gulf of Mannar East",
+      "centroid": { "lat": 9.10, "lon": 79.85 },
+      "distance_km": 38.5,
+      "bearing_deg": 130.0,
+      "chlorophyll_mg_m3": 1.42,
+      "sst_gradient_celsius": 0.9,
+      "depth_m": 35.0,
+      "valid_until": "2026-08-28T06:00:00Z",
+      "source": "incois-sample"
+    },
+    {
+      "pfz_id": "PFZ-TN-SAMPLE-003",
+      "sector_name": "Coromandel Coast Offshore",
+      "centroid": { "lat": 10.15, "lon": 80.10 },
+      "distance_km": 48.1,
+      "bearing_deg": 42.0,
+      "chlorophyll_mg_m3": 0.95,
+      "sst_gradient_celsius": 0.6,
+      "depth_m": 55.0,
+      "valid_until": "2026-08-28T06:00:00Z",
+      "source": "incois-sample"
+    }
+  ]
+}
