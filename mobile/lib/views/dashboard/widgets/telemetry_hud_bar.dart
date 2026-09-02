@@ -8,6 +8,8 @@ class TelemetryHudBar extends StatelessWidget {
   final GeofenceModel geofence;
   final VoidCallback? onLanguageTap;
   final VoidCallback? onOfflinePackTap;
+  final VoidCallback? onImblTap;
+  final VoidCallback? onSimulateTap;
   final String currentLanguage;
 
   const TelemetryHudBar({
@@ -16,6 +18,8 @@ class TelemetryHudBar extends StatelessWidget {
     required this.geofence,
     this.onLanguageTap,
     this.onOfflinePackTap,
+    this.onImblTap,
+    this.onSimulateTap,
     this.currentLanguage = 'English',
   });
 
@@ -23,15 +27,15 @@ class TelemetryHudBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.abyssBlack.withOpacity(0.94),
+        color: AppColors.cardSurface.withOpacity(0.96),
         border: const Border(
-          bottom: BorderSide(color: AppColors.glassBorder, width: 1.2),
+          bottom: BorderSide(color: AppColors.navyDark, width: 1.5),
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black87,
-            blurRadius: 14,
-            offset: Offset(0, 4),
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -46,98 +50,85 @@ class TelemetryHudBar extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // App Title, ISRO Tag & GNSS Lock
+                  // App Title & ISRO Tag
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.radarCyan.withOpacity(0.25),
-                              AppColors.deepOcean,
-                            ],
+                          gradient: const LinearGradient(
+                            colors: [AppColors.navyDark, AppColors.primaryBlue],
                           ),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.radarCyan.withOpacity(0.5)),
+                          border: Border.all(color: AppColors.accentLight.withOpacity(0.4)),
                         ),
                         child: const Text(
                           'ORCA',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.radarCyan,
+                            color: AppColors.iceWhite,
                             letterSpacing: 1.4,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
                         decoration: BoxDecoration(
-                          color: AppColors.marineSurface.withOpacity(0.5),
+                          color: AppColors.navyDark.withOpacity(0.4),
                           borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: AppColors.navyDark.withOpacity(0.6)),
                         ),
                         child: const Text(
-                          'ISRO 26176',
+                          'ISRO',
                           style: TextStyle(
-                            fontSize: 9,
+                            fontSize: 8.5,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textSecondary,
-                            letterSpacing: 0.5,
+                            color: AppColors.accentLight,
                           ),
                         ),
                       ),
                       const SizedBox(width: 6),
-                      // GNSS 14 Sats Green Dot
-                      Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: AppColors.bioGreen,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'GNSS 14',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.bioGreen,
-                            ),
-                          ),
-                        ],
+                      // Satellite status
+                      Container(
+                        width: 5,
+                        height: 5,
+                        decoration: const BoxDecoration(
+                          color: AppColors.bioGreen,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ],
                   ),
 
-                  // Actions: Offline Pack Pill + Language Chip
+                  // Actions: Test, Offline Pack & Language
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Offline Pack Button
+                      // Test Scenario Simulator Button
                       InkWell(
-                        onTap: onOfflinePackTap,
-                        borderRadius: BorderRadius.circular(8),
+                        onTap: onSimulateTap,
+                        borderRadius: BorderRadius.circular(6),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.deepOcean,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.radarCyan.withOpacity(0.35)),
+                            color: AppColors.navyDark.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: AppColors.primaryBlue.withOpacity(0.4)),
                           ),
                           child: const Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.download_for_offline, color: AppColors.radarCyan, size: 14),
-                              SizedBox(width: 5),
+                              Icon(Icons.science_rounded, color: AppColors.accentLight, size: 12),
+                              SizedBox(width: 3),
                               Text(
-                                '24h Pack',
+                                'Test',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.radarCyan,
+                                  color: AppColors.iceWhite,
                                 ),
                               ),
                             ],
@@ -145,30 +136,62 @@ class TelemetryHudBar extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 5),
+
+                      // Offline Pack Button
+                      InkWell(
+                        onTap: onOfflinePackTap,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.navyDark.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: AppColors.primaryBlue.withOpacity(0.4)),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.download_rounded, color: AppColors.accentLight, size: 12),
+                              SizedBox(width: 3),
+                              Text(
+                                'Pack',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.iceWhite,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 5),
 
                       // Language Selector Chip
                       InkWell(
                         onTap: onLanguageTap,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.marineSurface.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.glassBorder),
+                            color: AppColors.navyDark.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: AppColors.primaryBlue.withOpacity(0.4)),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                currentLanguage,
+                                currentLanguage.length > 4 ? currentLanguage.substring(0, 2).toUpperCase() : currentLanguage,
                                 style: const TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.iceWhite,
                                 ),
                               ),
-                              const Icon(Icons.arrow_drop_down, color: AppColors.radarCyan, size: 16),
+                              const Icon(Icons.arrow_drop_down_rounded, color: AppColors.accentLight, size: 14),
                             ],
                           ),
                         ),
@@ -180,23 +203,23 @@ class TelemetryHudBar extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              // Row 2: Enhanced Telemetry Ribbon (GPS, Speed, Heading, IMBL Alert)
+              // Row 2: Clean Telemetry Ribbon (GPS, Speed, Heading, IMBL Alert)
               Row(
                 children: [
-                  // GPS Coordinates (Flexible and clean)
+                  // GPS Coordinates
                   Expanded(
                     flex: 11,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppColors.deepOcean,
+                        color: AppColors.cardSurfaceLight,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.radarCyan.withOpacity(0.2)),
+                        border: Border.all(color: AppColors.navyDark),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.my_location, size: 12, color: AppColors.radarCyan),
-                          const SizedBox(width: 5),
+                          const Icon(Icons.my_location_rounded, size: 12, color: AppColors.primaryBlue),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -204,10 +227,10 @@ class TelemetryHudBar extends StatelessWidget {
                               child: Text(
                                 '${telemetry.latitude.toStringAsFixed(3)}°N  ${telemetry.longitude.toStringAsFixed(3)}°E',
                                 style: const TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 10.5,
                                   fontFamily: 'monospace',
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.iceWhite,
                                   letterSpacing: 0.2,
                                 ),
                               ),
@@ -222,15 +245,15 @@ class TelemetryHudBar extends StatelessWidget {
 
                   // Speed Chip
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.deepOcean,
+                      color: AppColors.cardSurfaceLight,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.bioGreen.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.navyDark),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.speed, size: 11, color: AppColors.bioGreen),
+                        const Icon(Icons.speed_rounded, size: 12, color: AppColors.primaryBlue),
                         const SizedBox(width: 4),
                         Text(
                           '${telemetry.speedKnots.toStringAsFixed(1)} kts',
@@ -238,7 +261,7 @@ class TelemetryHudBar extends StatelessWidget {
                             fontSize: 10,
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: AppColors.iceWhite,
                           ),
                         ),
                       ],
@@ -249,15 +272,15 @@ class TelemetryHudBar extends StatelessWidget {
 
                   // Heading Chip
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.deepOcean,
+                      color: AppColors.cardSurfaceLight,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.textAccent.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.navyDark),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.explore, size: 11, color: AppColors.textAccent),
+                        const Icon(Icons.explore_rounded, size: 12, color: AppColors.accentLight),
                         const SizedBox(width: 4),
                         Text(
                           '${telemetry.headingDeg.toStringAsFixed(0)}°',
@@ -265,7 +288,7 @@ class TelemetryHudBar extends StatelessWidget {
                             fontSize: 10,
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: AppColors.iceWhite,
                           ),
                         ),
                       ],
@@ -274,8 +297,12 @@ class TelemetryHudBar extends StatelessWidget {
 
                   const SizedBox(width: 6),
 
-                  // IMBL Distance Pill
-                  _buildImblPill(),
+                  // IMBL Distance Pill (Interactive with tap!)
+                  InkWell(
+                    onTap: onImblTap,
+                    borderRadius: BorderRadius.circular(8),
+                    child: _buildImblPill(),
+                  ),
                 ],
               ),
             ],
@@ -286,50 +313,52 @@ class TelemetryHudBar extends StatelessWidget {
   }
 
   Widget _buildImblPill() {
-    Color pillColor;
+    Color pillBg;
+    Color pillBorder;
+    Color pillText;
     String statusText;
     IconData icon;
 
     final dist = geofence.distanceToImblKm;
 
     if (dist <= 2.0) {
-      pillColor = AppColors.criticalRed;
+      pillBg = AppColors.criticalRed.withOpacity(0.2);
+      pillBorder = AppColors.criticalRed;
+      pillText = AppColors.criticalRed;
       statusText = '${dist.toStringAsFixed(1)} km DANGER';
       icon = Icons.warning_rounded;
     } else if (dist <= 5.0) {
-      pillColor = AppColors.warningAmber;
+      pillBg = AppColors.warningAmber.withOpacity(0.18);
+      pillBorder = AppColors.warningAmber;
+      pillText = AppColors.warningAmber;
       statusText = '${dist.toStringAsFixed(1)} km CAUTION';
       icon = Icons.shield_outlined;
     } else {
-      pillColor = AppColors.bioGreen;
+      pillBg = AppColors.bioGreen.withOpacity(0.18);
+      pillBorder = AppColors.bioGreen;
+      pillText = AppColors.bioGreen;
       statusText = '${dist.toStringAsFixed(1)} km SAFE';
-      icon = Icons.shield;
+      icon = Icons.shield_rounded;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: pillColor.withOpacity(0.18),
+        color: pillBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: pillColor, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: pillColor.withOpacity(0.2),
-            blurRadius: 6,
-          ),
-        ],
+        border: Border.all(color: pillBorder, width: 1.2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 11, color: pillColor),
+          Icon(icon, size: 11, color: pillText),
           const SizedBox(width: 4),
           Text(
             statusText,
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w900,
-              color: pillColor,
+              color: pillText,
               letterSpacing: 0.3,
             ),
           ),

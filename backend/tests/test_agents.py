@@ -110,3 +110,19 @@ def test_full_orca_graph_execution():
     assert final_state["english_response"] != ""
     assert final_state["localized_response"] != ""
     assert len(final_state["quick_replies"]) > 0
+
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("Running Dev 2 Multi-Agent Tests (backend/tests/test_agents.py)")
+    print("=" * 60)
+    test_intent_classifier_english()
+    print("  [PASS] test_intent_classifier_english")
+    test_intent_classifier_tamil()
+    print("  [PASS] test_intent_classifier_tamil")
+    test_full_orca_graph_execution()
+    print("  [PASS] test_full_orca_graph_execution")
+    print("=" * 60)
+    print("All Multi-Agent Tests Passed!")
+    print("=" * 60)
+

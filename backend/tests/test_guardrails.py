@@ -143,3 +143,27 @@ def test_orca_graph_routes_to_emergency_override():
     assert "CRITICAL SAFETY OVERRIDE" in result["english_response"]
     assert "அவசர எச்சரிக்கை" in result["localized_response"] # Tamil Emergency keyword
     assert "Steer Bearing" in result["quick_replies"][0]
+
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("Running Dev 2 Guardrails Tests (backend/tests/test_guardrails.py)")
+    print("=" * 60)
+    test_weather_guardrail_safe()
+    print("  [PASS] test_weather_guardrail_safe")
+    test_weather_guardrail_critical_wave_height()
+    print("  [PASS] test_weather_guardrail_critical_wave_height")
+    test_weather_guardrail_critical_squall_wind()
+    print("  [PASS] test_weather_guardrail_critical_squall_wind")
+    test_boundary_guardrail_safe()
+    print("  [PASS] test_boundary_guardrail_safe")
+    test_boundary_guardrail_critical_proximity()
+    print("  [PASS] test_boundary_guardrail_critical_proximity")
+    test_symbolic_verifier_end_to_end_emergency_trip()
+    print("  [PASS] test_symbolic_verifier_end_to_end_emergency_trip")
+    test_orca_graph_routes_to_emergency_override()
+    print("  [PASS] test_orca_graph_routes_to_emergency_override")
+    print("=" * 60)
+    print("All Guardrail Tests Passed!")
+    print("=" * 60)
+

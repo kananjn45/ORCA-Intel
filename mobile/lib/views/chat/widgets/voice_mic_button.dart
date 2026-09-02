@@ -65,8 +65,6 @@ class _VoiceMicButtonState extends State<VoiceMicButton> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = widget.isRecording ? AppColors.criticalRed : AppColors.radarCyan;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -83,60 +81,71 @@ class _VoiceMicButtonState extends State<VoiceMicButton> with SingleTickerProvid
                   animation: _pulseAnimation,
                   builder: (context, child) {
                     return Container(
-                      width: 80 * _pulseAnimation.value,
-                      height: 80 * _pulseAnimation.value,
+                      width: 76 * _pulseAnimation.value,
+                      height: 76 * _pulseAnimation.value,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: activeColor.withOpacity(1.0 - (_pulseAnimation.value - 1.0) / 0.5),
-                          width: 2.5,
+                          color: AppColors.criticalRed.withOpacity(1.0 - (_pulseAnimation.value - 1.0) / 0.5),
+                          width: 2.0,
                         ),
                       ),
                     );
                   },
                 ),
 
-              // 2. Primary Tactile Push-to-Talk Hero Button
+              // 2. Primary Tactical Push-to-Talk Hero Button
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: widget.isRecording ? 82 : 72,
-                height: widget.isRecording ? 82 : 72,
+                width: widget.isRecording ? 76 : 66,
+                height: widget.isRecording ? 76 : 66,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: activeColor,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: widget.isRecording
+                        ? [AppColors.criticalRed, const Color(0xFFC62828)]
+                        : [AppColors.primaryBlue, AppColors.navyDark],
+                  ),
+                  border: Border.all(
+                    color: widget.isRecording ? Colors.white : AppColors.accentLight.withOpacity(0.6),
+                    width: 2.0,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: activeColor.withOpacity(widget.isRecording ? 0.6 : 0.35),
-                      blurRadius: widget.isRecording ? 30 : 16,
-                      spreadRadius: widget.isRecording ? 5 : 2,
+                      color: (widget.isRecording ? AppColors.criticalRed : AppColors.primaryBlue)
+                          .withOpacity(widget.isRecording ? 0.6 : 0.35),
+                      blurRadius: widget.isRecording ? 24 : 14,
+                      spreadRadius: widget.isRecording ? 4 : 1,
                     ),
                   ],
                 ),
                 child: Icon(
-                  widget.isRecording ? Icons.mic : Icons.mic_none,
-                  size: widget.isRecording ? 40 : 36,
-                  color: widget.isRecording ? Colors.white : AppColors.abyssBlack,
+                  widget.isRecording ? Icons.mic : Icons.mic_none_rounded,
+                  size: widget.isRecording ? 36 : 32,
+                  color: AppColors.iceWhite,
                 ),
               ),
             ],
           ),
         ),
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
 
         // Text Guidance
         AnimatedDefaultTextStyle(
           duration: const Duration(milliseconds: 200),
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: widget.isRecording ? AppColors.criticalRed : AppColors.textSecondary,
+            color: widget.isRecording ? AppColors.criticalRed : AppColors.accentLight,
             letterSpacing: 0.3,
           ),
           child: Text(
             widget.isRecording
-                ? '🔴 Listening in ${widget.currentLanguage}... Release to Send'
-                : '🎙️ Hold to Speak in ${widget.currentLanguage}',
+                ? '🔴 Recording voice in ${widget.currentLanguage}... Release'
+                : '🎙️ Hold to Speak • ${widget.currentLanguage}',
           ),
         ),
       ],

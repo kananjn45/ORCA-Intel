@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:orca_mobile/data/models/telemetry_model.dart';
 import 'package:orca_mobile/data/models/geofence_model.dart';
 import 'package:orca_mobile/data/models/chat_message_model.dart';
+import 'package:orca_mobile/data/models/weather_model.dart';
 
 void main() {
   group('Dev 6 Day 1 & Day 2 Models Test Suite', () {
@@ -63,6 +64,31 @@ void main() {
       expect(fromJson.textEnglish, 'Warning! You are near the boundary.');
       expect(fromJson.isEmergency, true);
       expect(fromJson.quickReplies.length, 2);
+    });
+
+    test('WeatherModel serialization and compass bearing conversion', () {
+      final json = {
+        'latitude': 9.285,
+        'longitude': 79.312,
+        'wave_height_m': 1.4,
+        'wave_direction_deg': 180.0,
+        'wave_period_sec': 6.2,
+        'wind_speed_knots': 22.5,
+        'wind_direction_deg': 65.0,
+        'swell_wave_height_m': 0.8,
+        'sea_surface_temp_celsius': 29.2,
+        'sea_state_code': 3,
+        'is_safe_for_small_craft': true,
+        'advisory_summary': 'Safe conditions for motorized craft.',
+        'observed_at': '2026-09-02T12:00:00.000Z',
+        'source': 'open-meteo',
+      };
+
+      final model = WeatherModel.fromJson(json);
+      expect(model.waveHeightM, 1.4);
+      expect(model.windSpeedKnots, 22.5);
+      expect(model.windDirectionCompass, 'NE');
+      expect(model.isSafeForSmallCraft, true);
     });
   });
 }
