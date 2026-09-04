@@ -28,7 +28,7 @@ class TestTTLCache:
         self.cache = TTLCache(default_ttl_seconds=2, max_entries=5, name="test_cache")
 
     def _run(self, coro):
-        return asyncio.get_event_loop().run_until_complete(coro)
+        return asyncio.run(coro)
 
     def test_set_and_get(self):
         self._run(self.cache.set("k1", "hello"))
@@ -107,7 +107,7 @@ class TestMakeGridKey:
 
 class TestINCOISPFZMock:
     def _run(self, coro):
-        return asyncio.get_event_loop().run_until_complete(coro)
+        return asyncio.run(coro)
 
     def test_returns_list_of_pfz_features(self):
         from app.services.incois_pfz import get_pfz_features
@@ -238,7 +238,7 @@ class TestOpenMeteoSyntheticFallback:
             await cache.set(key, metric, ttl_seconds=60)
             return await cache.get(key)
 
-        result = asyncio.get_event_loop().run_until_complete(populate())
+        result = asyncio.run(populate())
         assert result is not None
         assert result.latitude == 13.0
 
@@ -249,7 +249,7 @@ class TestOpenMeteoSyntheticFallback:
 
 class TestBhashiniMock:
     def _run(self, coro):
-        return asyncio.get_event_loop().run_until_complete(coro)
+        return asyncio.run(coro)
 
     def test_transcribe_returns_string(self):
         from app.services.bhashini import transcribe_audio

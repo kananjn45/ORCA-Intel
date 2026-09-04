@@ -17,6 +17,7 @@ ORCA-Intel/
 │   ├── UI_UX_DESIGN.md                  # Mobile UI/UX Design System & Wireframes
 │   ├── APP_FLOW.md                      # Application & Multi-Agent Flow State Machines
 │   ├── BACKEND_SCHEMA.md                # Data Models, SQLite Schemas & API Contracts
+│   ├── GEOSPATIAL.md                    # Geospatial Math, Lookahead & A* Pathfinding Blueprint
 │   └── IMPLEMENTATION_PLAN.md           # 5-Day Sprint Plan for 6 Team Members
 │
 ├── backend/                             # Python FastAPI & LangGraph Backend

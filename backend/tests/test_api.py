@@ -128,7 +128,7 @@ def test_navigation_route_mock():
     resp = client.post("/api/v1/navigation/route", json=payload)
     assert resp.status_code == 200
     body = resp.json()
-    assert body["waypoints_count"] == 2
+    assert body["waypoints_count"] >= 2
     assert body["route_geojson"]["geometry"]["type"] == "LineString"
 
 

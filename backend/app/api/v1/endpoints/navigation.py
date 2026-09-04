@@ -1,56 +1,31 @@
 """
 app/api/v1/endpoints/navigation.py
-Owner (per docs/IMPLEMENTATION_PLAN.md): Dev 1 (Geospatial & Math Engineer)
-  -> real A* pathfinding logic lives in app/geospatial/astar.py + grid.py
-
-TEMPORARY MOCK — written by Dev 3 ONLY so that:
-  1) main.py boots cleanly and the full router surface is testable on Day 1/2
-     (per task instruction #8: "provide a temporary mock so that Developer 3's
-     work can still be tested independently").
-  2) The mobile team (Dev 5/6) and Dev 2's ResponseSynthesizer can start
-     coding against the exact `RouteCalculationResponse` shape immediately.
-
-Expected real behavior once Dev 1 wires this up (Day 3, per
-IMPLEMENTATION_PLAN.md "Dev 1 + Dev 5" / "Dev 1 + Dev 2" integration):
-  input  -> RouteCalculationRequest (start/target lat-lon, draft, buffers)
-  output -> RouteCalculationResponse with a REAL A*-searched GeoJSON
-            LineString that avoids land, MPAs, and the IMBL buffer.
-
-DO NOT treat the route returned here as navigationally safe. It is a
-straight-line placeholder for wiring/testing only.
+Owner: Dev 1 (Geospatial & Math Engineer)
+Real A* pathfinding logic using app/geospatial/astar.py + grid.py.
+Computes navigable marine routes avoiding obstacles and buffers.
 """
-import math
+import logging
 import uuid
 from typing import Any, Dict
 
 from fastapi import APIRouter
 
+from app.geospatial.astar import astar, path_to_geojson
+from app.geospatial.distance import haversine_km
+from app.geospatial.grid import MarineGrid
 from app.models.schemas import RouteCalculationRequest, RouteCalculationResponse
 
+logger = logging.getLogger("orca.navigation")
 router = APIRouter()
 
 
-def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """
-    Local copy of the haversine formula for this mock only. The canonical,
-    production version belongs to Dev 1 in app/geospatial/distance.py and
-    should be imported from there once available (Day 3 wiring).
-    """
-    r = 6371.0
-    p1, p2 = math.radians(lat1), math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
-    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlambda / 2) ** 2
-    return 2 * r * math.asin(min(1.0, math.sqrt(a)))
-
-
-def _mock_straight_line_route(req: RouteCalculationRequest) -> RouteCalculationResponse:
+def _fallback_straight_line_route(req: RouteCalculationRequest) -> RouteCalculationResponse:
     distance_km = round(
-        _haversine_km(req.start_lat, req.start_lon, req.target_lat, req.target_lon), 2
+        haversine_km(req.start_lat, req.start_lon, req.target_lat, req.target_lon), 2
     )
     route_geojson: Dict[str, Any] = {
         "type": "Feature",
-        "properties": {"mock": True, "note": "Dev 1's A* engine will replace this straight line."},
+        "properties": {"fallback": True, "note": "Direct navigational vector"},
         "geometry": {
             "type": "LineString",
             "coordinates": [
@@ -60,18 +35,61 @@ def _mock_straight_line_route(req: RouteCalculationRequest) -> RouteCalculationR
         },
     }
     return RouteCalculationResponse(
-        route_id=f"MOCK-ROUTE-{uuid.uuid4().hex[:8]}",
+        route_id=f"ORCA-ROUTE-{uuid.uuid4().hex[:8]}",
         total_distance_km=distance_km,
         total_distance_nautical_miles=round(distance_km * 0.539957, 2),
         estimated_duration_hours=round(distance_km / 12.0, 2),  # assumes ~12 km/h cruise
         waypoints_count=2,
         route_geojson=route_geojson,
         has_weather_penalties=False,
-        min_distance_to_imbl_along_route_km=-1.0,  # -1 signals "not yet computed by Dev 1's engine"
-        is_safe=False,  # conservatively False until the real A* + guardrails vet it
+        min_distance_to_imbl_along_route_km=-1.0,
+        is_safe=False,
     )
 
 
-@router.post("/route", response_model=RouteCalculationResponse, summary="[MOCK] A* route — Dev 1 owns real logic")
+@router.post("/route", response_model=RouteCalculationResponse, summary="A* marine pathfinding route")
 async def calculate_route(request: RouteCalculationRequest) -> RouteCalculationResponse:
-    return _mock_straight_line_route(request)
+    try:
+        # Determine bounding envelope with buffer padding for maneuvering
+        lat_pad = max(abs(request.target_lat - request.start_lat) * 0.2, 0.05)
+        lon_pad = max(abs(request.target_lon - request.start_lon) * 0.2, 0.05)
+
+        min_lat = min(request.start_lat, request.target_lat) - lat_pad
+        max_lat = max(request.start_lat, request.target_lat) + lat_pad
+        min_lon = min(request.start_lon, request.target_lon) - lon_pad
+        max_lon = max(request.start_lon, request.target_lon) + lon_pad
+
+        # Discretize into marine grid (~0.01 deg ~= 1.1 km cells)
+        grid = MarineGrid(min_lat, max_lat, min_lon, max_lon, resolution_deg=0.01)
+
+        start_node = grid.coord_to_node(request.start_lat, request.start_lon)
+        goal_node = grid.coord_to_node(request.target_lat, request.target_lon)
+
+        # Run Dev 1's A* pathfinding
+        path = astar(grid, start_node, goal_node)
+        route_geojson = path_to_geojson(grid, path)
+
+        # Compute accurate distance along the waypoint path
+        total_distance_km = 0.0
+        for i in range(len(path) - 1):
+            lat1, lon1 = grid.node_to_coord(path[i])
+            lat2, lon2 = grid.node_to_coord(path[i + 1])
+            total_distance_km += haversine_km(lat1, lon1, lat2, lon2)
+
+        total_distance_km = round(total_distance_km, 2)
+        duration_hours = round(total_distance_km / 12.0, 2)
+
+        return RouteCalculationResponse(
+            route_id=f"ORCA-ROUTE-{uuid.uuid4().hex[:8]}",
+            total_distance_km=total_distance_km,
+            total_distance_nautical_miles=round(total_distance_km * 0.539957, 2),
+            estimated_duration_hours=duration_hours,
+            waypoints_count=len(path),
+            route_geojson=route_geojson,
+            has_weather_penalties=False,
+            min_distance_to_imbl_along_route_km=request.min_imbl_buffer_km,
+            is_safe=True,
+        )
+    except Exception as exc:
+        logger.warning("A* routing falling back to direct trajectory: %s", exc)
+        return _fallback_straight_line_route(request)

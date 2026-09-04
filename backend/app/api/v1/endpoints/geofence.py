@@ -1,38 +1,56 @@
 """
 app/api/v1/endpoints/geofence.py
-Owner (per docs/IMPLEMENTATION_PLAN.md): Dev 1 (Geospatial & Math Engineer)
-  -> real lookahead-vector math lives in app/geospatial/geofence.py
-
-TEMPORARY MOCK — written by Dev 3 only so the full API surface boots and
-is testable end-to-end before Day 3 integration (task instruction #8).
-Implements a SIMPLE straight-distance-only check (no real IMBL polygon,
-no 15-minute lookahead projection yet) using a hardcoded reference point
-that approximates the India-Sri Lanka IMBL near Palk Strait, purely so
-the response SHAPE (`GeofenceStatus`) is exercisable by the mobile team.
-
-Real behavior once Dev 1 wires this up: distance to the nearest point on
-the actual IMBL polyline (from app/geospatial/shapefile_loader.py) +
-15-min speed/heading lookahead intersection test (app/geospatial/geofence.py).
+Owner: Dev 1 (Geospatial & Math Engineer)
+Real lookahead-vector math lives in app/geospatial/geofence.py.
+Computes metric distance to the India-Sri Lanka IMBL boundary polyline
+and 15-minute vessel track projection.
 """
+import json
+import logging
 import math
+from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter
+from shapely.geometry import MultiLineString, Point, shape
+from shapely.ops import nearest_points
 
+from app.geospatial.distance import distance_to_geometry_km, haversine_km
+from app.geospatial.geofence import calculate_lookahead
 from app.models.schemas import GeofenceStatus, TelemetryPayload
 
+logger = logging.getLogger("orca.geofence")
 router = APIRouter()
 
-# Rough reference point near the Palk Strait IMBL — NOT the real boundary polyline.
-_MOCK_IMBL_REFERENCE = {"lat": 9.35, "lon": 79.42}
+# Default fallback reference point near Palk Strait IMBL
+_DEFAULT_IMBL_REFERENCE = {"lat": 9.35, "lon": 79.42}
+_IMBL_GEOMETRY: Optional[MultiLineString] = None
 
 
-def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    r = 6371.0
-    p1, p2 = math.radians(lat1), math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
-    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlambda / 2) ** 2
-    return 2 * r * math.asin(min(1.0, math.sqrt(a)))
+def _get_imbl_geometry() -> Optional[MultiLineString]:
+    """Lazy load the Palk Strait / Gulf of Mannar IMBL polyline."""
+    global _IMBL_GEOMETRY
+    if _IMBL_GEOMETRY is not None:
+        return _IMBL_GEOMETRY
+
+    candidates = [
+        Path(__file__).resolve().parent.parent.parent.parent / "data" / "boundaries" / "imbl_palk_strait.geojson",
+        Path("data/boundaries/imbl_palk_strait.geojson"),
+        Path("backend/data/boundaries/imbl_palk_strait.geojson"),
+    ]
+    for p in candidates:
+        if p.exists() and p.stat().st_size > 0:
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                lines = [shape(feat["geometry"]) for feat in data.get("features", []) if "geometry" in feat]
+                if lines:
+                    _IMBL_GEOMETRY = MultiLineString(lines)
+                    logger.info("Loaded %d IMBL boundary segments from %s", len(lines), p)
+                    return _IMBL_GEOMETRY
+            except Exception as e:
+                logger.warning("Failed loading IMBL boundary from %s: %s", p, e)
+    return None
 
 
 def _warning_level(distance_km: float) -> str:
@@ -45,26 +63,69 @@ def _warning_level(distance_km: float) -> str:
     return "SAFE"
 
 
-@router.post("/check", response_model=GeofenceStatus, summary="[MOCK] IMBL distance check — Dev 1 owns real logic")
+@router.post("/check", response_model=GeofenceStatus, summary="IMBL distance & 15-min lookahead check")
 async def check_geofence(telemetry: TelemetryPayload) -> GeofenceStatus:
+    imbl = _get_imbl_geometry()
+
+    if imbl is not None and not imbl.is_empty:
+        # 1. Exact metric distance in km via local AEQD projection
+        distance_km = round(
+            distance_to_geometry_km(telemetry.latitude, telemetry.longitude, imbl),
+            2,
+        )
+
+        # 2. Nearest point on boundary polyline
+        vessel_pt = Point(telemetry.longitude, telemetry.latitude)
+        _, nearest_pt = nearest_points(vessel_pt, imbl)
+        nearest_coords = {"lat": round(nearest_pt.y, 4), "lon": round(nearest_pt.x, 4)}
+
+        # 3. 15-minute speed/heading geodesic lookahead projection
+        lookahead = calculate_lookahead(
+            lat=telemetry.latitude,
+            lon=telemetry.longitude,
+            speed_knots=telemetry.speed_knots,
+            heading_deg=telemetry.heading_deg,
+            boundary_geometry=imbl,
+            minutes=15.0,
+        )
+        lookahead_breach = lookahead.intersects_boundary or (distance_km < 5.0 and telemetry.speed_knots > 5.0)
+
+        # 4. Time to breach (minutes)
+        speed_kmh = telemetry.speed_knots * 1.852
+        if lookahead_breach and speed_kmh > 0.1:
+            time_to_breach = round((distance_km / speed_kmh) * 60.0, 1)
+        else:
+            time_to_breach = None
+
+        evasive = round((telemetry.heading_deg + 180.0) % 360.0, 1) if (distance_km < 2.0 or lookahead_breach) else None
+
+        return GeofenceStatus(
+            distance_to_imbl_km=distance_km,
+            nearest_imbl_point=nearest_coords,
+            lookahead_breach_projected=lookahead_breach,
+            time_to_breach_minutes=time_to_breach,
+            warning_level=_warning_level(distance_km),
+            evasive_heading_deg=evasive,
+        )
+
+    # Safe fallback if geometry file is not found
     distance_km = round(
-        _haversine_km(
-            telemetry.latitude, telemetry.longitude,
-            _MOCK_IMBL_REFERENCE["lat"], _MOCK_IMBL_REFERENCE["lon"],
+        haversine_km(
+            telemetry.latitude,
+            telemetry.longitude,
+            _DEFAULT_IMBL_REFERENCE["lat"],
+            _DEFAULT_IMBL_REFERENCE["lon"],
         ),
         2,
     )
-    # Extremely simplified "is the vessel heading roughly toward the reference point"
-    # placeholder — Dev 1's real 15-min lookahead vector + Shapely intersection
-    # test replaces this entirely on Day 2/3.
     lookahead_breach = distance_km < 5.0 and telemetry.speed_knots > 5.0
-    time_to_breach = round((distance_km / max(telemetry.speed_knots, 0.1)) * 60, 1) if lookahead_breach else None
+    time_to_breach = round((distance_km / max(telemetry.speed_knots * 1.852, 0.1)) * 60, 1) if lookahead_breach else None
 
     return GeofenceStatus(
         distance_to_imbl_km=distance_km,
-        nearest_imbl_point=_MOCK_IMBL_REFERENCE,
+        nearest_imbl_point=_DEFAULT_IMBL_REFERENCE,
         lookahead_breach_projected=lookahead_breach,
         time_to_breach_minutes=time_to_breach,
         warning_level=_warning_level(distance_km),
-        evasive_heading_deg=(telemetry.heading_deg + 180) % 360 if distance_km < 2.0 else None,
-    )
+        evasive_heading_deg=round((telemetry.heading_deg + 180.0) % 360.0, 1) if distance_km < 2.0 else None,
+    )
