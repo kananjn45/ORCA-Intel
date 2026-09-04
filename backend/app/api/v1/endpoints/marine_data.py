@@ -12,8 +12,10 @@ Implements:
                                        demonstrating the caching layer to
                                        judges / teammates)
 """
+import json
 from datetime import datetime, timedelta, timezone
-from typing import List
+from pathlib import Path
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, HTTPException, Query, status
 
@@ -25,6 +27,28 @@ from app.services.cache import get_all_cache_stats
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+_IMBL_GEOJSON: Dict[str, Any] | None = None
+
+
+def _get_imbl_geojson() -> Dict[str, Any]:
+    global _IMBL_GEOJSON
+    if _IMBL_GEOJSON is not None:
+        return _IMBL_GEOJSON
+    candidates = [
+        Path(__file__).resolve().parent.parent.parent.parent / "data" / "boundaries" / "india_imbl.geojson",
+        Path("data/boundaries/india_imbl.geojson"),
+        Path("backend/data/boundaries/india_imbl.geojson"),
+    ]
+    for p in candidates:
+        if p.exists() and p.stat().st_size > 0:
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    _IMBL_GEOJSON = json.load(f)
+                    return _IMBL_GEOJSON
+            except Exception:
+                pass
+    return empty_feature_collection()
 
 
 def _validate_lat(lat: float) -> None:
@@ -150,7 +174,7 @@ async def get_offline_pack(
         bounding_box={"min_lat": min_lat, "min_lon": min_lon, "max_lat": max_lat, "max_lon": max_lon},
         weather_grid=weather_grid,
         pfz_advisories=pfz_advisories,
-        imbl_boundary_geojson=empty_feature_collection(),
+        imbl_boundary_geojson=_get_imbl_geojson(),
         grid_resolution_deg=grid_resolution_deg,
         cell_count=len(weather_grid),
     )

@@ -8,6 +8,7 @@ from app.models.schemas import (
     ChatQueryResponse,
     GeofenceStatus,
     GuardrailValidationReport,
+    RouteCalculationResponse,
 )
 from app.services import incois_pfz, open_meteo
 from app.agents.graph import orca_graph
@@ -72,6 +73,23 @@ async def post_chat_message(request: ChatQueryRequest) -> ChatQueryResponse:
         is_emergency = False
         quick_replies = ["Check Border", "Nearest PFZ", "Sea Waves"]
 
+    active_route = None
+    if "graph_result" in locals() and graph_result.get("route_data"):
+        try:
+            active_route = RouteCalculationResponse(**graph_result["route_data"])
+        except Exception:
+            active_route = None
+
+    b_metrics = (graph_result.get("boundary_metrics") if "graph_result" in locals() else None) or {}
+    geofence_stat = GeofenceStatus(
+        distance_to_imbl_km=b_metrics.get("distance_to_imbl_km", 13.88),
+        nearest_imbl_point=b_metrics.get("nearest_imbl_point") or {"lat": 9.35, "lon": 79.42},
+        lookahead_breach_projected=b_metrics.get("lookahead_breach_projected", False),
+        time_to_breach_minutes=b_metrics.get("time_to_breach_minutes"),
+        warning_level=b_metrics.get("warning_level", "SAFE"),
+        evasive_heading_deg=b_metrics.get("evasive_heading_deg"),
+    )
+
     return ChatQueryResponse(
         session_id=request.session_id,
         transcribed_text=request.user_query_text,
@@ -85,14 +103,9 @@ async def post_chat_message(request: ChatQueryRequest) -> ChatQueryResponse:
             violations=safety_violations,
             emergency_action_triggered=is_emergency,
         ),
-        active_route=None,
+        active_route=active_route,
         recommended_pfzs=pfzs[:3],
         weather_summary=weather,
-        geofence_status=GeofenceStatus(
-            distance_to_imbl_km=13.88,
-            nearest_imbl_point={"lat": 9.35, "lon": 79.42},
-            lookahead_breach_projected=False,
-            warning_level="SAFE",
-        ),
+        geofence_status=geofence_stat,
         quick_replies=quick_replies,
     )

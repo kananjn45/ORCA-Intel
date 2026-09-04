@@ -1,0 +1,142 @@
+{
+  "type": "FeatureCollection",
+  "name": "incois_pfz_advisory_sample",
+  "generated_at": "2026-09-04T12:00:00Z",
+  "valid_until": "2026-09-07T12:00:00Z",
+  "source": "INCOIS Marine Fishery Advisory System (ESSO-INCOIS)",
+  "region": "Tamil Nadu Coastal Waters (Palk Bay & Gulf of Mannar)",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-TN-20260904-001",
+        "sector_name": "Palk Bay South",
+        "centroid": {
+          "lat": 9.4200,
+          "lon": 79.5500
+        },
+        "distance_km": 14.2,
+        "bearing_deg": 65.0,
+        "chlorophyll_mg_m3": 1.45,
+        "sst_gradient_celsius": 0.95,
+        "depth_m": 18.5,
+        "valid_until": "2026-09-07T12:00:00Z",
+        "target_species": ["Sardinella longiceps (Oil Sardine)", "Rastrelliger kanagurta (Indian Mackerel)"],
+        "confidence_level": "HIGH",
+        "source": "INCOIS-MOSDAC Satellite Fusion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [79.5100, 9.4000],
+            [79.5900, 9.4100],
+            [79.6000, 9.4500],
+            [79.5300, 9.4600],
+            [79.4900, 9.4200],
+            [79.5100, 9.4000]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-TN-20260904-002",
+        "sector_name": "Gulf of Mannar East",
+        "centroid": {
+          "lat": 9.0800,
+          "lon": 79.3200
+        },
+        "distance_km": 21.0,
+        "bearing_deg": 175.0,
+        "chlorophyll_mg_m3": 1.20,
+        "sst_gradient_celsius": 0.75,
+        "depth_m": 28.0,
+        "valid_until": "2026-09-07T12:00:00Z",
+        "target_species": ["Katsuwonus pelamis (Skipjack Tuna)", "Carangidae (Trevally)"],
+        "confidence_level": "VERY_HIGH",
+        "source": "INCOIS-MOSDAC Satellite Fusion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [79.2800, 9.0500],
+            [79.3600, 9.0600],
+            [79.3700, 9.1100],
+            [79.2900, 9.1200],
+            [79.2600, 9.0800],
+            [79.2800, 9.0500]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-TN-20260904-003",
+        "sector_name": "Rameswaram Channel Outer",
+        "centroid": {
+          "lat": 9.3200,
+          "lon": 79.4800
+        },
+        "distance_km": 11.5,
+        "bearing_deg": 82.0,
+        "chlorophyll_mg_m3": 1.65,
+        "sst_gradient_celsius": 1.10,
+        "depth_m": 15.0,
+        "valid_until": "2026-09-07T12:00:00Z",
+        "target_species": ["Penaeus semisulcatus (Green Tiger Prawn)", "Lethrinus (Emperor Bream)"],
+        "confidence_level": "HIGH",
+        "source": "INCOIS-MOSDAC Satellite Fusion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [79.4400, 9.3000],
+            [79.5200, 9.3100],
+            [79.5300, 9.3400],
+            [79.4600, 9.3500],
+            [79.4200, 9.3200],
+            [79.4400, 9.3000]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-TN-20260904-004",
+        "sector_name": "Tuticorin Approach Shelf",
+        "centroid": {
+          "lat": 8.7800,
+          "lon": 78.4200
+        },
+        "distance_km": 18.0,
+        "bearing_deg": 110.0,
+        "chlorophyll_mg_m3": 1.10,
+        "sst_gradient_celsius": 0.65,
+        "depth_m": 35.0,
+        "valid_until": "2026-09-07T12:00:00Z",
+        "target_species": ["Scomberomorus commerson (King Mackerel)", "Nemipterus (Threadfin Bream)"],
+        "confidence_level": "MODERATE",
+        "source": "INCOIS-MOSDAC Satellite Fusion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [78.3600, 8.7400],
+            [78.4700, 8.7500],
+            [78.4800, 8.8200],
+            [78.3800, 8.8100],
+            [78.3400, 8.7700],
+            [78.3600, 8.7400]
+          ]
+        ]
+      }
+    }
+  ]
+}

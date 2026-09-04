@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "description": "Simplified India-Sri Lanka International Maritime Boundary Line (IMBL) reference points near Palk Strait. For hackathon demo use only — NOT a navigational chart.",
+  "source": "Approximate IMBL reference from public maritime domain knowledge",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "India-Sri Lanka IMBL - Palk Strait Segment",
+        "boundary_type": "IMBL",
+        "description": "Approximate IMBL running through Palk Strait between India and Sri Lanka",
+        "buffer_km": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [79.42, 9.35],
+          [79.55, 9.25],
+          [79.68, 9.18],
+          [79.80, 9.10],
+          [79.95, 9.05],
+          [80.10, 9.00]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "India-Sri Lanka IMBL - Gulf of Mannar Segment",
+        "boundary_type": "IMBL",
+        "description": "Approximate IMBL in the Gulf of Mannar",
+        "buffer_km": 2.0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.85, 8.80],
+          [79.00, 8.90],
+          [79.15, 8.95],
+          [79.30, 9.00],
+          [79.42, 9.05]
+        ]
+      }
+    }
+  ]
+}

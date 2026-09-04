@@ -50,6 +50,10 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        if (constraints.maxWidth <= 0 || constraints.maxHeight <= 0) {
+          return Container(color: AppColors.bgMidnight);
+        }
+
         final center = Offset(constraints.maxWidth / 2, constraints.maxHeight * 0.40);
 
         return Stack(
@@ -339,12 +343,19 @@ class _MarineChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+
+    final safeCenter = Offset(
+      (center.dx.isNaN || center.dx.isInfinite) ? size.width / 2 : center.dx,
+      (center.dy.isNaN || center.dy.isInfinite) ? size.height * 0.40 : center.dy,
+    );
+
     // 1. Smooth Depth Bathymetry Gradient
+    final normX = ((safeCenter.dx / size.width) * 2 - 1).clamp(-1.0, 1.0);
+    final normY = ((safeCenter.dy / size.height) * 2 - 1).clamp(-1.0, 1.0);
+
     final oceanGrad = RadialGradient(
-      center: Alignment(
-        (center.dx / size.width) * 2 - 1,
-        (center.dy / size.height) * 2 - 1,
-      ),
+      center: Alignment(normX, normY),
       radius: 0.65,
       colors: const [
         Color(0xFF0C2448),
@@ -386,7 +397,7 @@ class _MarineChartPainter extends CustomPainter {
       final label = ring['label'] as String;
 
       ringPaint.color = AppColors.accentLight.withOpacity(alpha);
-      canvas.drawCircle(center, r, ringPaint);
+      canvas.drawCircle(safeCenter, r, ringPaint);
 
       final tp = TextPainter(
         text: TextSpan(
@@ -399,31 +410,38 @@ class _MarineChartPainter extends CustomPainter {
         ),
         textDirection: TextDirection.ltr,
       )..layout();
-      tp.paint(canvas, Offset(center.dx + 4, center.dy - r - 11));
+      tp.paint(canvas, Offset(safeCenter.dx + 4, safeCenter.dy - r - 11));
     }
 
     // 4. Subtle Radar Sweep Cone
+    final sweepNormX = (safeCenter.dx / size.width).clamp(0.0, 1.0);
+    final sweepNormY = (safeCenter.dy / size.height).clamp(0.0, 1.0);
+
+    final double safeSweep = sweepAngle.clamp(0.0, 2 * math.pi);
+    final double start = math.max(0.0, safeSweep - 0.4);
+    final double end = math.max(start + 0.01, safeSweep);
+
     final sweepPaint = Paint()
       ..shader = SweepGradient(
-        center: FractionalOffset(center.dx / size.width, center.dy / size.height),
-        startAngle: sweepAngle - 0.4,
-        endAngle: sweepAngle,
+        center: FractionalOffset(sweepNormX, sweepNormY),
+        startAngle: start,
+        endAngle: end,
         colors: [
           Colors.transparent,
           AppColors.primaryBlue.withOpacity(0.09),
         ],
         stops: const [0.0, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: 160));
+      ).createShader(Rect.fromCircle(center: safeCenter, radius: 160));
 
-    canvas.drawCircle(center, 160, sweepPaint);
+    canvas.drawCircle(safeCenter, 160, sweepPaint);
 
     // 5. Crosshair Ticks
     final crossPaint = Paint()
       ..color = AppColors.accentLight.withOpacity(0.2)
       ..strokeWidth = 0.8;
 
-    canvas.drawLine(Offset(center.dx - 160, center.dy), Offset(center.dx + 160, center.dy), crossPaint);
-    canvas.drawLine(Offset(center.dx, center.dy - 160), Offset(center.dx, center.dy + 160), crossPaint);
+    canvas.drawLine(Offset(safeCenter.dx - 160, safeCenter.dy), Offset(safeCenter.dx + 160, safeCenter.dy), crossPaint);
+    canvas.drawLine(Offset(safeCenter.dx, safeCenter.dy - 160), Offset(safeCenter.dx, safeCenter.dy + 160), crossPaint);
 
     // 6. Active PFZ Navigation Vector (If active)
     if (showPfzCourse) {
@@ -432,8 +450,8 @@ class _MarineChartPainter extends CustomPainter {
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke;
       
-      final pfzTarget = Offset(center.dx - 80, center.dy + 55);
-      canvas.drawLine(center, pfzTarget, pfzCoursePaint);
+      final pfzTarget = Offset(safeCenter.dx - 80, safeCenter.dy + 55);
+      canvas.drawLine(safeCenter, pfzTarget, pfzCoursePaint);
 
       final pfzDot = Paint()..color = AppColors.bioGreen;
       canvas.drawCircle(pfzTarget, 5.0, pfzDot);
@@ -446,8 +464,8 @@ class _MarineChartPainter extends CustomPainter {
         ..strokeWidth = 3.0
         ..style = PaintingStyle.stroke;
 
-      final evasiveTarget = Offset(center.dx - 110, center.dy + 10);
-      canvas.drawLine(center, evasiveTarget, evasivePaint);
+      final evasiveTarget = Offset(safeCenter.dx - 110, safeCenter.dy + 10);
+      canvas.drawLine(safeCenter, evasiveTarget, evasivePaint);
 
       final evasiveDot = Paint()..color = AppColors.warningAmber;
       canvas.drawCircle(evasiveTarget, 5.0, evasiveDot);

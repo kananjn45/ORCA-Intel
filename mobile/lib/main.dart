@@ -5,7 +5,9 @@ import 'core/constants/app_constants.dart';
 import 'views/dashboard/dashboard_screen.dart';
 
 void main() {
+  debugPrint('🚀 ORCA MAIN FUNCTION STARTED 🚀');
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('🚀 WIDGETS BINDING INITIALIZED 🚀');
 
   // Lock status bar and navigation bar styling for tactical dark mode
   SystemChrome.setSystemUIOverlayStyle(

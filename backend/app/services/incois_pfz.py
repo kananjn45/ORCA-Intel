@@ -128,6 +128,53 @@ async def _fetch_live_pfz_features(latitude: float, longitude: float, radius_km:
     )
 
 
+import json
+from pathlib import Path
+
+def _load_sample_pfz_features(latitude: float, longitude: float, radius_km: float) -> List[PFZFeature]:
+    candidates = [
+        Path(__file__).resolve().parent.parent.parent / "data" / "samples" / "pfz_sample.json",
+        Path("data/samples/pfz_sample.json"),
+        Path("backend/data/samples/pfz_sample.json"),
+    ]
+    for p in candidates:
+        if p.exists() and p.stat().st_size > 0:
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                features: List[PFZFeature] = []
+                now = datetime.now(timezone.utc)
+                for item in data.get("features", []):
+                    props = item.get("properties", {})
+                    centroid = props.get("centroid", {})
+                    c_lat = centroid.get("lat", latitude)
+                    c_lon = centroid.get("lon", longitude)
+                    dist = round(_haversine_km(latitude, longitude, c_lat, c_lon), 2)
+                    if dist <= radius_km * 1.5:  # within operational search radius
+                        bearing = round(_bearing_deg(latitude, longitude, c_lat, c_lon), 1)
+                        features.append(
+                            PFZFeature(
+                                pfz_id=props.get("pfz_id", f"PFZ-TN-{now.strftime('%Y%m%d')}-001"),
+                                sector_name=props.get("sector_name", "Palk Bay"),
+                                centroid={"lat": c_lat, "lon": c_lon},
+                                distance_km=dist,
+                                bearing_deg=bearing,
+                                chlorophyll_mg_m3=props.get("chlorophyll_mg_m3", 1.2),
+                                sst_gradient_celsius=props.get("sst_gradient_celsius", 0.8),
+                                depth_m=props.get("depth_m", 20.0),
+                                valid_until=now + timedelta(hours=48),
+                                geojson_geometry=item.get("geometry", {}),
+                                source=props.get("source", "INCOIS-MOSDAC"),
+                            )
+                        )
+                if features:
+                    features.sort(key=lambda f: f.chlorophyll_mg_m3, reverse=True)
+                    return features
+            except Exception as e:
+                logger.warning("Failed loading pfz_sample.json from %s: %s", p, e)
+    return []
+
+
 async def get_pfz_features(
     latitude: float, longitude: float, radius_km: float = 50.0, use_cache: bool = True
 ) -> List[PFZFeature]:
@@ -144,7 +191,11 @@ async def get_pfz_features(
     if settings.INCOIS_USE_MOCK:
         result = _generate_mock_pfz_features(latitude, longitude, radius_km)
     else:
-        result = await _fetch_live_pfz_features(latitude, longitude, radius_km)
+        sample_features = _load_sample_pfz_features(latitude, longitude, radius_km)
+        if sample_features:
+            result = sample_features
+        else:
+            result = await _fetch_live_pfz_features(latitude, longitude, radius_km)
 
     if use_cache:
         await cache.set(cache_key, result, ttl_seconds=settings.PFZ_CACHE_TTL_SECONDS)

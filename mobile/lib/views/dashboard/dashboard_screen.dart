@@ -10,6 +10,7 @@ import '../../data/repositories/marine_repository.dart';
 import '../../data/repositories/chat_repository.dart';
 import 'widgets/telemetry_hud_bar.dart';
 import 'widgets/sea_state_gauge.dart';
+import 'widgets/emergency_banner.dart';
 import '../map/tactical_radar_canvas.dart';
 import '../chat/conversational_sheet.dart';
 import '../chat/widgets/language_selector_sheet.dart';
@@ -503,10 +504,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _setScenario(lat: 9.345, lon: 79.412, heading: 90.0, speed: 11.2);
                 },
               ),
+              const SizedBox(height: 8),
+              // Scenario 4 (ISRO Golden Scenario 3: Storm Cell & Offline Safe Harbor)
+              ListTile(
+                tileColor: AppColors.cardSurfaceLight,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                leading: const Icon(Icons.thunderstorm_rounded, color: AppColors.warningAmber),
+                title: const Text('Scenario 4: High Seas Cyclone & Shelter Harbor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.warningAmber)),
+                subtitle: const Text('Wave: 3.2m • Wind: 34 kts • Pre-cached shelter route', style: TextStyle(fontSize: 10, color: AppColors.accentLight)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _setStormScenario();
+                },
+              ),
             ],
           ),
         );
       },
+    );
+  }
+
+  void _setStormScenario() {
+    setState(() {
+      _telemetry = TelemetryModel(
+        latitude: 9.350,
+        longitude: 79.250,
+        speedKnots: 5.2,
+        headingDeg: 240.0,
+        timestamp: DateTime.now(),
+      );
+      _weather = WeatherModel(
+        latitude: 9.350,
+        longitude: 79.250,
+        waveHeightM: 3.2,
+        waveDirectionDeg: 90.0,
+        wavePeriodSec: 7.8,
+        windSpeedKnots: 34.0,
+        windDirectionDeg: 85.0,
+        swellWaveHeightM: 2.8,
+        seaSurfaceTempCelsius: 27.2,
+        seaStateCode: 5,
+        isSafeForSmallCraft: false,
+        advisorySummary: 'STORM WARNING: Severe wave action (3.2m, 34 kts wind). All small crafts seek immediate harbor refuge!',
+        observedAt: DateTime.now(),
+      );
+      _showEvasiveCourse = true;
+      _showPfzCourse = false;
+      _latestAdvisory = ChatMessageModel(
+        id: 'storm-01',
+        sender: MessageSender.orca,
+        textLocalized: 'புயல் எச்சரிக்கை! அலை 3.2மீ, காற்று 34 நாட்ஸ். உடனடியாக ராமேஸ்வரம் துறைமுகத்திற்கு திரும்பவும்.',
+        textEnglish: 'STORM WARNING! Wave height 3.2m with 34 kts squall winds. Return to Rameswaram shelter harbor immediately via Safe Course 240° W.',
+        timestamp: DateTime.now(),
+        quickReplies: ['Rameswaram Harbor Route', 'Hourly Barometer', 'Mayday Alert'],
+      );
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: AppColors.warningAmber,
+        content: Text(
+          '⚠️ Cyclone Alert: High wave action detected (3.2m). Course plotted to shelter harbor.',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+      ),
     );
   }
 
@@ -613,10 +674,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
+          // 2.5 EMERGENCY ALERT BANNER (Active during Warning / Critical / Lookahead breach)
+          if (_geofence.warningLevel == GeofenceWarningLevel.critical ||
+              _geofence.warningLevel == GeofenceWarningLevel.warning ||
+              _geofence.lookaheadBreachProjected)
+            Positioned(
+              top: 104,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                bottom: false,
+                child: EmergencyBanner(
+                  geofence: _geofence,
+                  onEngageEvasive: () {
+                    HapticFeedback.heavyImpact();
+                    setState(() {
+                      _showEvasiveCourse = true;
+                      _showPfzCourse = false;
+                      _telemetry = TelemetryModel(
+                        latitude: _telemetry.latitude,
+                        longitude: _telemetry.longitude,
+                        speedKnots: _telemetry.speedKnots,
+                        headingDeg: _geofence.evasiveHeadingDeg ?? 265.0,
+                        timestamp: DateTime.now(),
+                      );
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: AppColors.criticalRed,
+                        content: Text(
+                          '🚨 Evasive 180° course engaged (Heading ${_geofence.evasiveHeadingDeg?.toStringAsFixed(0) ?? "265"}° W back into Indian waters)',
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    );
+                  },
+                  onDismiss: () {
+                    setState(() {
+                      _geofence = GeofenceModel(
+                        distanceToImblKm: _geofence.distanceToImblKm,
+                        nearestImblPoint: _geofence.nearestImblPoint,
+                        lookaheadBreachProjected: false,
+                        warningLevel: GeofenceWarningLevel.advisory,
+                        evasiveHeadingDeg: _geofence.evasiveHeadingDeg,
+                      );
+                    });
+                  },
+                ),
+              ),
+            ),
+
           // 3. FLOATING GLASSMORHPIC WEATHER INSTRUMENT (LIVE OPEN-METEO DATA - INTERACTIVE!)
           Positioned(
             left: 14,
-            top: 104,
+            top: (_geofence.warningLevel == GeofenceWarningLevel.critical ||
+                    _geofence.warningLevel == GeofenceWarningLevel.warning ||
+                    _geofence.lookaheadBreachProjected)
+                ? 270
+                : 104,
             child: SafeArea(
               bottom: false,
               child: SeaStateGauge(

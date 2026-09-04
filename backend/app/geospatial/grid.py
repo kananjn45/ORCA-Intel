@@ -78,5 +78,16 @@ class MarineGrid:
     def is_blocked(self, node: GridNode) -> bool:
         return node in self.blocked
 
+    def unblock(self, node: GridNode) -> None:
+        """Ensure start/goal nodes are traversable even if near coastline borders."""
+        self.blocked.discard(node)
+
     def step_distance_km(self, a: GridNode, b: GridNode) -> float:
         return haversine_km(*self.node_to_coord(a), *self.node_to_coord(b))
+
+    def path_length_km(self, path: list[GridNode]) -> float:
+        """Compute the total geodesic distance along a path of grid nodes."""
+        total = 0.0
+        for i in range(len(path) - 1):
+            total += self.step_distance_km(path[i], path[i + 1])
+        return total

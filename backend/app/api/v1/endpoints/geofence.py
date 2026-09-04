@@ -34,6 +34,9 @@ def _get_imbl_geometry() -> Optional[MultiLineString]:
         return _IMBL_GEOMETRY
 
     candidates = [
+        Path(__file__).resolve().parent.parent.parent.parent / "data" / "boundaries" / "india_imbl.geojson",
+        Path("data/boundaries/india_imbl.geojson"),
+        Path("backend/data/boundaries/india_imbl.geojson"),
         Path(__file__).resolve().parent.parent.parent.parent / "data" / "boundaries" / "imbl_palk_strait.geojson",
         Path("data/boundaries/imbl_palk_strait.geojson"),
         Path("backend/data/boundaries/imbl_palk_strait.geojson"),
@@ -43,7 +46,13 @@ def _get_imbl_geometry() -> Optional[MultiLineString]:
             try:
                 with open(p, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                lines = [shape(feat["geometry"]) for feat in data.get("features", []) if "geometry" in feat]
+                lines = [
+                    shape(feat["geometry"])
+                    for feat in data.get("features", [])
+                    if "geometry" in feat and feat.get("properties", {}).get("boundary_type", "IMBL") == "IMBL"
+                ]
+                if not lines:
+                    lines = [shape(feat["geometry"]) for feat in data.get("features", []) if "geometry" in feat]
                 if lines:
                     _IMBL_GEOMETRY = MultiLineString(lines)
                     logger.info("Loaded %d IMBL boundary segments from %s", len(lines), p)

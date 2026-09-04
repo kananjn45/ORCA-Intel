@@ -32,6 +32,7 @@ class AppColors {
   // Glassmorphic shaders
   static const Color glassFill = Color(0xD90A1E3B);
   static const Color glassBorder = Color(0x3390CAF9);
+  static const Color glassDanger = Color(0x33EF5350);
 
   // ============================================================================
   // Sunlight Deck Mode

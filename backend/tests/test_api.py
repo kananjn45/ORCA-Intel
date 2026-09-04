@@ -349,4 +349,61 @@ def test_pydantic_schemas_contract():
         guardrail_report=gr,
         geofence_status=g,
     )
-    assert cq_res.session_id == "session-001"
+    assert cq_res.session_id == "session-001"
+
+
+def test_offline_pack_contains_imbl_geojson_features():
+    resp = client.get(
+        "/api/v1/marine/offline-pack",
+        params={"min_lat": 8.5, "min_lon": 78.5, "max_lat": 9.0, "max_lon": 79.0, "grid_resolution_deg": 0.5},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["imbl_boundary_geojson"]["type"] == "FeatureCollection"
+    assert len(body["imbl_boundary_geojson"].get("features", [])) >= 2
+
+
+def test_navigation_astar_obstacle_avoidance_endpoint():
+    resp = client.post(
+        "/api/v1/navigation/route",
+        json={
+            "start_lat": 9.28,
+            "start_lon": 79.31,
+            "target_lat": 9.42,
+            "target_lon": 79.55,
+            "vessel_draft_m": 1.5,
+            "avoid_high_waves": True,
+            "min_imbl_buffer_km": 2.0,
+        },
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["route_id"].startswith("ORCA-ROUTE-")
+    assert body["total_distance_km"] > 0
+    assert body["waypoints_count"] >= 2
+    assert body["route_geojson"]["geometry"]["type"] == "LineString"
+    assert body["min_distance_to_imbl_along_route_km"] > 0
+    assert isinstance(body["is_safe"], bool)
+
+
+def test_chat_endpoint_populates_active_route_and_geofence():
+    resp = client.post(
+        "/api/v1/chat/message",
+        json={
+            "session_id": "test-dev-bridge",
+            "user_query_text": "Find nearest safe fishing zone and plot route",
+            "source_language": "en",
+            "telemetry": {
+                "latitude": 9.28,
+                "longitude": 79.31,
+                "speed_knots": 8.0,
+                "heading_deg": 85.0,
+            },
+        },
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["geofence_status"]["distance_to_imbl_km"] > 0
+    assert body["active_route"] is not None
+    assert body["active_route"]["total_distance_km"] > 0
+    assert len(body["recommended_pfzs"]) > 0
