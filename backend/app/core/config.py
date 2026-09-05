@@ -34,6 +34,24 @@ class Settings(BaseSettings):
     BHASHINI_PIPELINE_ENDPOINT: str = "https://dhruva-api.bhashini.gov.in/services/inference/pipeline"
     BHASHINI_USE_MOCK: bool = True
 
+    # Dev 4 Voice Pipeline Settings (Dhruva/ULCA + TTS Cache)
+    bhashini_api_key: str = ""
+    bhashini_user_id: str = ""
+    bhashini_pipeline_id: str = "64392f96daac500b55c543cd"
+    bhashini_inference_endpoint: str = "https://dhruva-api.bhashini.gov.in/services/inference/pipeline"
+    bhashini_config_endpoint: str = "https://meity-auth.ulcacontrib.org/ulca/apis/v0/model/getModelsPipeline"
+    bhashini_timeout_seconds: float = 30.0
+    bhashini_mock_mode: bool = False
+
+    # Audio Defaults
+    audio_sample_rate: int = 16000
+    audio_channels: int = 1
+    audio_sample_width: int = 2
+
+    # TTS Audio Cache
+    tts_cache_ttl_seconds: float = 3600.0
+    tts_cache_max_entries: int = 256
+
     # Database
     DATABASE_URL: str = "sqlite+aiosqlite:///./orca_local.db"
     POSTGRES_SERVER: str = "localhost"
@@ -68,9 +86,25 @@ class Settings(BaseSettings):
     )
 
     @property
+    def bhashini_configured(self) -> bool:
+        """Return True if real Bhashini credentials are available."""
+        key = self.bhashini_api_key or self.BHASHINI_API_KEY
+        uid = self.bhashini_user_id or self.BHASHINI_USER_ID
+        return bool(key and uid)
+
+    @property
+    def use_bhashini_mock(self) -> bool:
+        """Return True when mock/fallback mode should be used."""
+        return self.bhashini_mock_mode or not self.bhashini_configured
+
+    @property
     def cors_origins_list(self) -> List[str]:
         if self.CORS_ORIGINS == "*":
             return ["*"]
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 settings = Settings()
+
+def get_settings() -> Settings:
+    """Return singleton Settings instance."""
+    return settings
