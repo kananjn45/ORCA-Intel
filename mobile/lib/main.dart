@@ -27,11 +27,18 @@ class OrcaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appName,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTactical,
-      home: const DashboardScreen(),
+    return ValueListenableBuilder<bool>(
+      valueListenable: ThemeController.isDarkMode,
+      builder: (context, isDark, _) {
+        return MaterialApp(
+          title: AppConstants.appName,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.sunlightDeck,
+          darkTheme: AppTheme.darkTactical,
+          themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+          home: const DashboardScreen(),
+        );
+      },
     );
   }
 }

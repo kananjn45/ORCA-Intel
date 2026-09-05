@@ -18,6 +18,8 @@ class MarineMapView extends StatefulWidget {
   final GeofenceModel geofence;
   final bool showPfzRoute;
   final bool showEvasiveRoute;
+  final bool isDarkMode;
+  final VoidCallback? onThemeToggle;
   final VoidCallback? onRecenterTap;
   final VoidCallback? onMenuTap;
   final VoidCallback? onAvatarTap;
@@ -32,6 +34,8 @@ class MarineMapView extends StatefulWidget {
     required this.geofence,
     this.showPfzRoute = true,
     this.showEvasiveRoute = false,
+    this.isDarkMode = true,
+    this.onThemeToggle,
     this.onRecenterTap,
     this.onMenuTap,
     this.onAvatarTap,
@@ -217,15 +221,18 @@ class _MarineMapViewState extends State<MarineMapView>
             initialZoom: 10.2,
             minZoom: 5.0,
             maxZoom: 17.0,
-            backgroundColor: AppColors.brandNavy,
+            backgroundColor: widget.isDarkMode ? AppColors.brandNavy : const Color(0xFFE2E8F0),
           ),
           children: [
-            // Dark Oceanic OpenStreetMap Tile Layer (No API Key Required, No Watermark)
+            // OpenStreetMap Tile Layer (Dark oceanic filter in night mode, clean daylight in deck mode)
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               maxZoom: 18,
               userAgentPackageName: 'org.orca.mobile',
               tileBuilder: (context, tileWidget, tile) {
+                if (!widget.isDarkMode) {
+                  return tileWidget;
+                }
                 return ColorFiltered(
                   colorFilter: const ColorFilter.matrix([
                     // Invert RGB and tint towards deep midnight oceanic blue
@@ -391,21 +398,21 @@ class _MarineMapViewState extends State<MarineMapView>
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color: const Color(0xD9041926),
+                            color: widget.isDarkMode ? const Color(0xD9041926) : Colors.white.withOpacity(0.92),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.08),
+                              color: widget.isDarkMode ? Colors.white.withOpacity(0.08) : const Color(0xFFCBD5E1),
                               width: 1,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.35),
+                                color: Colors.black.withOpacity(widget.isDarkMode ? 0.35 : 0.08),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
                             ],
                           ),
-                          child: const Column(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SizedBox(
@@ -413,19 +420,19 @@ class _MarineMapViewState extends State<MarineMapView>
                                 height: 2,
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color: AppColors.inkLight,
-                                    borderRadius: BorderRadius.all(Radius.circular(1)),
+                                    color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
+                                    borderRadius: const BorderRadius.all(Radius.circular(1)),
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               SizedBox(
                                 width: 12,
                                 height: 2,
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color: AppColors.inkLight,
-                                    borderRadius: BorderRadius.all(Radius.circular(1)),
+                                    color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
+                                    borderRadius: const BorderRadius.all(Radius.circular(1)),
                                   ),
                                 ),
                               ),
@@ -442,31 +449,33 @@ class _MarineMapViewState extends State<MarineMapView>
                     children: [
                       Transform.rotate(
                         angle: -20 * math.pi / 180,
-                        child: const Text(
+                        child: Text(
                           '⌁',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.neonLime,
+                            color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF0284C7),
                             height: 1.0,
                           ),
                         ),
                       ),
                       const SizedBox(width: 4),
                       RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           style: TextStyle(
                             fontFamily: 'Manrope',
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.6,
-                            color: AppColors.inkLight,
+                            color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
                           ),
                           children: [
-                            TextSpan(text: 'Sea'),
+                            const TextSpan(text: 'Sea'),
                             TextSpan(
                               text: 'Sentinel',
-                              style: TextStyle(color: AppColors.neonLime),
+                              style: TextStyle(
+                                color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF0284C7),
+                              ),
                             ),
                           ],
                         ),
@@ -474,42 +483,93 @@ class _MarineMapViewState extends State<MarineMapView>
                     ],
                   ),
 
-                  // Profile / Language Avatar
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      widget.onAvatarTap?.call();
-                    },
-                    child: Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: const Color(0xD9041926),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: const Color(0xFF75A5AB),
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
+                  // Actions: Theme Toggle + Profile / Language Avatar
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Quick Sunlight / Tactical Night Theme Toggle
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          widget.onThemeToggle?.call();
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                            child: Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: widget.isDarkMode
+                                    ? const Color(0xD9041926)
+                                    : Colors.white.withOpacity(0.92),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: widget.isDarkMode
+                                      ? AppColors.neonLime.withOpacity(0.5)
+                                      : const Color(0xFF0284C7).withOpacity(0.5),
+                                  width: 1.2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(widget.isDarkMode ? 0.35 : 0.08),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  widget.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                  size: 19,
+                                  color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF0284C7),
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                      child: const Center(
-                        child: Text(
-                          'RK',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                            color: AppColors.inkLight,
+                      const SizedBox(width: 8),
+
+                      // Profile / Language Avatar
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          widget.onAvatarTap?.call();
+                        },
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: widget.isDarkMode ? const Color(0xD9041926) : Colors.white.withOpacity(0.92),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: widget.isDarkMode ? const Color(0xFF75A5AB) : const Color(0xFF94A3B8),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(widget.isDarkMode ? 0.35 : 0.08),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Text(
+                              'RK',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                                color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
@@ -518,85 +578,66 @@ class _MarineMapViewState extends State<MarineMapView>
         ),
 
         // ====================================================================
-        // 3. FLOATING GPS STATUS BADGE
+        // 3. FLOATING GPS STATUS BADGE (Streamlined 1-Row Nautical Pill)
         // ====================================================================
         Positioned(
           top: 66,
           left: 18,
           child: SafeArea(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: AppColors.brandSurfaceGlass,
-                    borderRadius: BorderRadius.circular(8),
+                    color: widget.isDarkMode ? AppColors.brandSurfaceGlass : Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.cardBorder.withOpacity(0.5),
+                      color: widget.isDarkMode ? AppColors.cardBorder.withOpacity(0.5) : const Color(0xFFCBD5E1),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withOpacity(widget.isDarkMode ? 0.3 : 0.08),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AnimatedBuilder(
-                            animation: _pulseController,
-                            builder: (context, child) {
-                              return Container(
-                                width: 6.5,
-                                height: 6.5,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.neonLime,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.neonLime.withOpacity(
-                                        0.3 + 0.6 * _pulseController.value,
-                                      ),
-                                      blurRadius: 4 + 4 * _pulseController.value,
-                                      spreadRadius: 1 * _pulseController.value,
-                                    ),
-                                  ],
+                      AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          return Container(
+                            width: 6.5,
+                            height: 6.5,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF16A34A),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (widget.isDarkMode ? AppColors.neonLime : const Color(0xFF16A34A)).withOpacity(
+                                    0.3 + 0.6 * _pulseController.value,
+                                  ),
+                                  blurRadius: 4 + 4 * _pulseController.value,
+                                  spreadRadius: 1 * _pulseController.value,
                                 ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 6),
-                          const Text(
-                            'GPS CONNECTED',
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.inkLight,
-                              letterSpacing: 0.8,
+                              ],
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                      const SizedBox(height: 2),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: Text(
-                          '${_formatCoordinate(widget.telemetry.latitude, true)}, ${_formatCoordinate(widget.telemetry.longitude, false)}',
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted.withOpacity(0.9),
-                            letterSpacing: 0.2,
-                          ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'GPS · ${_formatCoordinate(widget.telemetry.latitude, true)}, ${_formatCoordinate(widget.telemetry.longitude, false)}',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ],
@@ -619,6 +660,7 @@ class _MarineMapViewState extends State<MarineMapView>
               showPfz: _layerPfz,
               showHazards: _layerHazards,
               showImbl: _layerImbl,
+              isDarkMode: widget.isDarkMode,
               onToggleRoute: () => setState(() => _layerRoute = !_layerRoute),
               onTogglePfz: () => setState(() => _layerPfz = !_layerPfz),
               onToggleHazards: () => setState(() => _layerHazards = !_layerHazards),
@@ -643,25 +685,27 @@ class _MarineMapViewState extends State<MarineMapView>
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xD9041926),
+                    color: widget.isDarkMode ? const Color(0xD9041926) : Colors.white.withOpacity(0.92),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: AppColors.electricTeal.withOpacity(0.4),
+                      color: widget.isDarkMode
+                          ? AppColors.electricTeal.withOpacity(0.4)
+                          : const Color(0xFFCBD5E1),
                       width: 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.4),
+                        color: Colors.black.withOpacity(widget.isDarkMode ? 0.4 : 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       Icons.my_location_rounded,
                       size: 22,
-                      color: AppColors.electricTeal,
+                      color: widget.isDarkMode ? AppColors.electricTeal : const Color(0xFF0284C7),
                     ),
                   ),
                 ),
@@ -689,15 +733,15 @@ class _MarineMapViewState extends State<MarineMapView>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xDD072B3C),
+                    color: widget.isDarkMode ? const Color(0xDD072B3C) : Colors.white.withOpacity(0.94),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: AppColors.cardBorder,
+                      color: widget.isDarkMode ? AppColors.cardBorder : const Color(0xFFCBD5E1),
                       width: 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.4),
+                        color: Colors.black.withOpacity(widget.isDarkMode ? 0.4 : 0.08),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -705,16 +749,16 @@ class _MarineMapViewState extends State<MarineMapView>
                   ),
                   child: Row(
                     children: [
-                      // Pulsing green route indicator dot
+                      // Pulsing route indicator dot
                       Container(
                         width: 9,
                         height: 9,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.neonLime,
+                          color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF16A34A),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.neonLime.withOpacity(0.4),
+                              color: (widget.isDarkMode ? AppColors.neonLime : const Color(0xFF16A34A)).withOpacity(0.4),
                               blurRadius: 8,
                               spreadRadius: 3,
                             ),
@@ -726,13 +770,13 @@ class _MarineMapViewState extends State<MarineMapView>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
+                          Text(
                             'ACTIVE ROUTE',
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.1,
-                              color: AppColors.textMuted,
+                              color: widget.isDarkMode ? AppColors.textMuted : const Color(0xFF64748B),
                             ),
                           ),
                           const SizedBox(height: 1),
@@ -740,18 +784,18 @@ class _MarineMapViewState extends State<MarineMapView>
                             widget.showEvasiveRoute
                                 ? 'EVASIVE · Return to India Waters'
                                 : 'PFZ · Sector 04',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.inkLight,
+                              color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
                             ),
                           ),
                         ],
                       ),
                       const Spacer(),
-                      const Icon(
+                      Icon(
                         Icons.arrow_forward_rounded,
-                        color: AppColors.neonLime,
+                        color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF0284C7),
                         size: 20,
                       ),
                     ],

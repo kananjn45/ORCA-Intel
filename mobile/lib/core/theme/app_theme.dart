@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dark_tactical_theme.dart';
 import '../constants/app_colors.dart';
+
+class ThemeController {
+  static final ValueNotifier<bool> isDarkMode = ValueNotifier<bool>(true);
+
+  static void toggleTheme() {
+    HapticFeedback.mediumImpact();
+    isDarkMode.value = !isDarkMode.value;
+  }
+
+  static void setDarkMode(bool dark) {
+    if (isDarkMode.value != dark) {
+      isDarkMode.value = dark;
+    }
+  }
+}
 
 class AppTheme {
   static ThemeData get darkTactical => buildDarkTacticalTheme();

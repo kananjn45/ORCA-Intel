@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../data/models/telemetry_model.dart';
 import '../../data/models/geofence_model.dart';
@@ -646,55 +647,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final waveHeight = _weather?.waveHeightM ?? 0.8;
-    final windSpeed = _weather?.windSpeedKnots ?? 12.0;
-    final imblDist = _geofence.distanceToImblKm;
+    return ValueListenableBuilder<bool>(
+      valueListenable: ThemeController.isDarkMode,
+      builder: (context, isDark, _) {
+        final waveHeight = _weather?.waveHeightM ?? 0.8;
+        final windSpeed = _weather?.windSpeedKnots ?? 12.0;
+        final imblDist = _geofence.distanceToImblKm;
 
-    return Scaffold(
-      backgroundColor: AppColors.brandNavy,
-      body: Stack(
-        children: [
-          // ==================================================================
-          // UPPER PANEL: LIVE MARINE MAP (OR TACTICAL RADAR CANVAS)
-          // ==================================================================
-          Positioned.fill(
-            bottom: 240, // Leaves space for the bottom Command Deck
-            child: _activeNavIndex == 1
-                // Radar Mode
-                ? TacticalRadarCanvas(
-                    vesselHeadingDeg: _telemetry.headingDeg,
-                    speedKnots: _telemetry.speedKnots,
-                    imblDistanceKm: _geofence.distanceToImblKm,
-                    showPfzCourse: _showPfzCourse,
-                    showEvasiveCourse: _showEvasiveCourse,
-                    onPfzTap: _showPfzDetailsModal,
-                    onImblTap: _showBorderDetailsModal,
-                    onVesselTap: _showSimulationControls,
-                  )
-                // Default: Live Web UI-Styled Marine Map
-                : MarineMapView(
-                    telemetry: _telemetry,
-                    geofence: _geofence,
-                    showPfzRoute: _showPfzCourse,
-                    showEvasiveRoute: _showEvasiveCourse,
-                    onMenuTap: _showSimulationControls,
-                    onAvatarTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (ctx) => LanguageSelectorSheet(
-                          currentLanguageCode: _currentLanguageCode,
-                          onLanguageSelected: _handleLanguageChanged,
-                        ),
-                      );
-                    },
-                    onPfzTap: _showPfzDetailsModal,
-                    onImblTap: _showBorderDetailsModal,
-                    onHazardsTap: _showWeatherDetailsModal,
-                    onRouteChipTap: _showPfzDetailsModal,
-                  ),
-          ),
+        return Scaffold(
+          backgroundColor: isDark ? AppColors.brandNavy : const Color(0xFFF1F5F9),
+          body: Stack(
+            children: [
+              // ==================================================================
+              // UPPER PANEL: LIVE MARINE MAP (OR TACTICAL RADAR CANVAS)
+              // ==================================================================
+              Positioned.fill(
+                bottom: 240, // Leaves space for the bottom Command Deck
+                child: _activeNavIndex == 1
+                    // Radar Mode
+                    ? TacticalRadarCanvas(
+                        vesselHeadingDeg: _telemetry.headingDeg,
+                        speedKnots: _telemetry.speedKnots,
+                        imblDistanceKm: _geofence.distanceToImblKm,
+                        showPfzCourse: _showPfzCourse,
+                        showEvasiveCourse: _showEvasiveCourse,
+                        onPfzTap: _showPfzDetailsModal,
+                        onImblTap: _showBorderDetailsModal,
+                        onVesselTap: _showSimulationControls,
+                      )
+                    // Default: Live Web UI-Styled Marine Map
+                    : MarineMapView(
+                        telemetry: _telemetry,
+                        geofence: _geofence,
+                        showPfzRoute: _showPfzCourse,
+                        showEvasiveRoute: _showEvasiveCourse,
+                        isDarkMode: isDark,
+                        onThemeToggle: ThemeController.toggleTheme,
+                        onMenuTap: _showSimulationControls,
+                        onAvatarTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (ctx) => LanguageSelectorSheet(
+                              currentLanguageCode: _currentLanguageCode,
+                              onLanguageSelected: _handleLanguageChanged,
+                            ),
+                          );
+                        },
+                        onPfzTap: _showPfzDetailsModal,
+                        onImblTap: _showBorderDetailsModal,
+                        onHazardsTap: _showWeatherDetailsModal,
+                        onRouteChipTap: _showPfzDetailsModal,
+                      ),
+              ),
 
           // ==================================================================
           // EMERGENCY BANNER (Pops in if Warning / Critical / Lookahead Breach)
@@ -757,22 +763,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             bottom: 0,
             child: Container(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF062033),
-                    Color(0xFF061B2B),
-                  ],
+                  colors: isDark
+                      ? const [
+                          Color(0xFF062033),
+                          Color(0xFF061B2B),
+                        ]
+                      : const [
+                          Color(0xFFFFFFFF),
+                          Color(0xFFF8FAFC),
+                        ],
                 ),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 border: Border.all(
-                  color: AppColors.cardBorder.withOpacity(0.35),
+                  color: isDark ? AppColors.cardBorder.withOpacity(0.35) : const Color(0xFFCBD5E1),
                   width: 1.2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.55),
+                    color: Colors.black.withOpacity(isDark ? 0.55 : 0.08),
                     blurRadius: 24,
                     offset: const Offset(0, -6),
                   ),
@@ -790,7 +801,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         width: 38,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: AppColors.brandHandle,
+                          color: isDark ? AppColors.brandHandle : const Color(0xFFCBD5E1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -804,25 +815,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'GOOD MORNING, CAPTAIN',
                                   style: TextStyle(
-                                    fontFamily: 'Courier',
-                                    fontSize: 9,
+                                    fontSize: 9.5,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 1.1,
-                                    color: AppColors.textMuted,
+                                    color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 RichText(
                                   text: TextSpan(
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Manrope',
                                       fontSize: 18,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: -0.6,
-                                      color: AppColors.inkLight,
+                                      color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
                                     ),
                                     children: [
                                       const TextSpan(text: 'Conditions are '),
@@ -830,7 +840,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         text: waveHeight < 2.0 ? 'favourable.' : 'hazardous!',
                                         style: TextStyle(
                                           color: waveHeight < 2.0
-                                              ? AppColors.neonLime
+                                              ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
                                               : AppColors.hazardAmber,
                                           fontStyle: FontStyle.italic,
                                         ),
@@ -853,31 +863,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF173A47),
+                                color: isDark ? const Color(0xFF173A47) : const Color(0xFFE2E8F0),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: const Color(0xFF2C5963),
+                                  color: isDark ? const Color(0xFF2C5963) : const Color(0xFFCBD5E1),
                                   width: 1,
                                 ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Safety',
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFFBDE1DF),
+                                      color: isDark ? const Color(0xFFBDE1DF) : const Color(0xFF0F172A),
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     _selectedTelemetryIndex != null ? '▾' : '›',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w900,
-                                      color: AppColors.neonLime,
+                                      color: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
                                     ),
                                   ),
                                 ],
@@ -896,13 +906,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: _buildTelemetryCard(
                               index: 0,
                               icon: '≈',
-                              iconColor: AppColors.electricCyan,
+                              iconColor: isDark ? AppColors.electricCyan : const Color(0xFF0284C7),
                               label: 'WAVE',
                               value: waveHeight.toStringAsFixed(1),
                               unit: 'm',
                               status: waveHeight < 1.5 ? '● CALM' : '● SWELL',
                               statusColor: waveHeight < 1.5
-                                  ? AppColors.neonLime
+                                  ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
                                   : AppColors.hazardAmber,
                               isSelected: _selectedTelemetryIndex == 0,
                               onTap: () {
@@ -920,12 +930,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: _buildTelemetryCard(
                               index: 1,
                               icon: '↗',
-                              iconColor: AppColors.neonLime,
+                              iconColor: isDark ? AppColors.neonLime : const Color(0xFF16A34A),
                               label: 'WIND',
                               value: windSpeed.toStringAsFixed(0),
                               unit: 'kt',
                               status: 'NE · STEADY',
-                              statusColor: AppColors.textMuted,
+                              statusColor: isDark ? AppColors.textMuted : const Color(0xFF64748B),
                               isSelected: _selectedTelemetryIndex == 1,
                               onTap: () {
                                 HapticFeedback.selectionClick();
@@ -942,13 +952,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: _buildTelemetryCard(
                               index: 2,
                               icon: '⌁',
-                              iconColor: AppColors.electricTeal,
+                              iconColor: isDark ? AppColors.electricTeal : const Color(0xFF0D9488),
                               label: 'BORDER',
                               value: imblDist.toStringAsFixed(1),
                               unit: 'km',
                               status: imblDist > 5.0 ? '● SAFE' : '⚠️ CAUTION',
                               statusColor: imblDist > 5.0
-                                  ? AppColors.neonLime
+                                  ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
                                   : AppColors.safetyRed,
                               isSelected: _selectedTelemetryIndex == 2,
                               onTap: () {
@@ -986,24 +996,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                 decoration: BoxDecoration(
-                                  color: AppColors.neonLime,
+                                  color: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
                                   borderRadius: BorderRadius.circular(13),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.neonLime.withOpacity(0.3),
+                                      color: (isDark ? AppColors.neonLime : const Color(0xFF0284C7)).withOpacity(0.3),
                                       blurRadius: 10,
                                       offset: const Offset(0, 3),
                                     ),
                                   ],
                                 ),
-                                child: const Row(
+                                child: Row(
                                   children: [
                                     Icon(
                                       Icons.explore_rounded,
-                                      color: Color(0xFF092238),
+                                      color: isDark ? const Color(0xFF092238) : Colors.white,
                                       size: 24,
                                     ),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
@@ -1011,11 +1021,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         Text(
                                           'NAVIGATION',
                                           style: TextStyle(
-                                            fontFamily: 'Courier',
-                                            fontSize: 8,
+                                            fontSize: 8.5,
                                             fontWeight: FontWeight.w700,
                                             letterSpacing: 1.0,
-                                            color: Color(0x99092238),
+                                            color: isDark ? const Color(0x99092238) : Colors.white70,
                                           ),
                                         ),
                                         Text(
@@ -1023,15 +1032,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w800,
-                                            color: Color(0xFF092238),
+                                            color: isDark ? const Color(0xFF092238) : Colors.white,
                                           ),
                                         ),
                                       ],
                                     ),
-                                    Spacer(),
+                                    const Spacer(),
                                     Icon(
                                       Icons.arrow_forward_rounded,
-                                      color: Color(0xFF092238),
+                                      color: isDark ? const Color(0xFF092238) : Colors.white,
                                       size: 20,
                                     ),
                                   ],
@@ -1050,27 +1059,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               width: 48,
                               height: 48,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF123949),
+                                color: isDark ? const Color(0xFF123949) : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(13),
                                 border: Border.all(
-                                  color: const Color(0xFF286070),
+                                  color: isDark ? const Color(0xFF286070) : const Color(0xFFCBD5E1),
                                   width: 1.2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
+                                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: Text(
                                   '⌁',
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w900,
-                                    color: AppColors.neonLime,
+                                    color: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
                                   ),
                                 ),
                               ),
@@ -1083,9 +1092,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       // Bottom Navigation Bar
                       Container(
                         padding: const EdgeInsets.only(top: 8),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           border: Border(
-                            top: BorderSide(color: Color(0xFF183747), width: 1),
+                            top: BorderSide(
+                              color: isDark ? const Color(0xFF183747) : const Color(0xFFE2E8F0),
+                              width: 1,
+                            ),
                           ),
                         ),
                         child: Row(
@@ -1128,20 +1140,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
+      },
+    );
   }
 
   Widget _buildInlineAdvisoryCard(double waveHeight, double windSpeed, double imblDist) {
+    final isDark = ThemeController.isDarkMode.value;
+    final cardBg = isDark ? const Color(0xCC09293A) : Colors.white;
+    final primaryTextColor = isDark ? AppColors.inkLight : const Color(0xFF0F172A);
+    final secondaryTextColor = isDark ? AppColors.textMuted : const Color(0xFF475569);
+    final closeIconColor = isDark ? AppColors.textMuted : const Color(0xFF64748B);
+
     if (_selectedTelemetryIndex == 0) {
       // Wave advisory
+      final waveBorderColor = isDark ? AppColors.electricCyan.withOpacity(0.7) : const Color(0xFF0284C7);
+      final waveAccentColor = isDark ? AppColors.electricCyan : const Color(0xFF0284C7);
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: const Color(0xCC09293A),
+          color: cardBg,
           borderRadius: BorderRadius.circular(13),
-          border: Border.all(color: AppColors.electricCyan.withOpacity(0.7), width: 1.2),
+          border: Border.all(color: waveBorderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: AppColors.electricCyan.withOpacity(0.12),
+              color: waveAccentColor.withOpacity(isDark ? 0.12 : 0.08),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -1153,21 +1175,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.waves_rounded, size: 17, color: AppColors.electricCyan),
+                Icon(Icons.waves_rounded, size: 17, color: waveAccentColor),
                 const SizedBox(width: 6),
                 Text(
                   'SEA STATE · ${waveHeight < 1.5 ? "CALM & SAFE" : "MODERATE SWELL"}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
-                    color: AppColors.electricCyan,
+                    color: waveAccentColor,
                   ),
                 ),
                 const Spacer(),
                 GestureDetector(
                   onTap: () => setState(() => _selectedTelemetryIndex = null),
-                  child: const Icon(Icons.close_rounded, size: 17, color: AppColors.textMuted),
+                  child: Icon(Icons.close_rounded, size: 17, color: closeIconColor),
                 ),
               ],
             ),
@@ -1176,7 +1198,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               waveHeight < 1.5
                   ? 'Wave height is ${waveHeight.toStringAsFixed(1)} m. Safe for motorized fishing crafts. Favourable surface conditions along Tamil Nadu coast.'
                   : 'Swell height is ${waveHeight.toStringAsFixed(1)} m. Moderate waves detected. Exercise caution and maintain safe heading.',
-              style: const TextStyle(fontSize: 11, color: AppColors.inkLight, height: 1.35),
+              style: TextStyle(fontSize: 11, color: primaryTextColor, height: 1.35),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1184,27 +1206,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   'Swell: ${_weather?.swellWaveHeightM.toStringAsFixed(1) ?? "0.7"} m • SST: 28.4°C',
-                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: secondaryTextColor),
                 ),
                 GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
                     _fetchLiveBackendData();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        backgroundColor: AppColors.brandSurface,
-                        content: Text('🌊 Satellite ocean feed updated', style: TextStyle(color: AppColors.inkLight)),
+                      SnackBar(
+                        backgroundColor: isDark ? AppColors.brandSurface : const Color(0xFFE2E8F0),
+                        content: Text(
+                          '🌊 Satellite ocean feed updated',
+                          style: TextStyle(color: primaryTextColor),
+                        ),
                       ),
                     );
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.electricCyan.withOpacity(0.15),
+                      color: waveAccentColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.electricCyan.withOpacity(0.4)),
+                      border: Border.all(color: waveAccentColor.withOpacity(0.4)),
                     ),
-                    child: const Text('Refresh Feed ↺', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: AppColors.electricCyan)),
+                    child: Text('Refresh Feed ↺', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: waveAccentColor)),
                   ),
                 ),
               ],
@@ -1214,15 +1239,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     } else if (_selectedTelemetryIndex == 1) {
       // Wind advisory
+      final windBorderColor = isDark ? AppColors.neonLime.withOpacity(0.7) : const Color(0xFF16A34A);
+      final windAccentColor = isDark ? AppColors.neonLime : const Color(0xFF16A34A);
+
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: const Color(0xCC09293A),
+          color: cardBg,
           borderRadius: BorderRadius.circular(13),
-          border: Border.all(color: AppColors.neonLime.withOpacity(0.7), width: 1.2),
+          border: Border.all(color: windBorderColor, width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: AppColors.neonLime.withOpacity(0.12),
+              color: windAccentColor.withOpacity(isDark ? 0.12 : 0.08),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -1234,21 +1262,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.air_rounded, size: 17, color: AppColors.neonLime),
+                Icon(Icons.air_rounded, size: 17, color: windAccentColor),
                 const SizedBox(width: 6),
                 Text(
                   'WIND SPEED · ${windSpeed.toStringAsFixed(0)} KT (STEADY BREEZE)',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
-                    color: AppColors.neonLime,
+                    color: windAccentColor,
                   ),
                 ),
                 const Spacer(),
                 GestureDetector(
                   onTap: () => setState(() => _selectedTelemetryIndex = null),
-                  child: const Icon(Icons.close_rounded, size: 17, color: AppColors.textMuted),
+                  child: Icon(Icons.close_rounded, size: 17, color: closeIconColor),
                 ),
               ],
             ),
@@ -1257,23 +1285,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               windSpeed < 20
                   ? 'Steady North-East wind at ${windSpeed.toStringAsFixed(0)} knots. Well below the 25 kt small-craft squall threshold. Favourable sailing drift.'
                   : 'Strong breeze (${windSpeed.toStringAsFixed(0)} kt). Approaching squall threshold (25 kt). Secure gear and monitor course.',
-              style: const TextStyle(fontSize: 11, color: AppColors.inkLight, height: 1.35),
+              style: TextStyle(fontSize: 11, color: primaryTextColor, height: 1.35),
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Direction: ENE (65°) • Gusts: 15 kt',
-                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: secondaryTextColor),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.neonLime.withOpacity(0.15),
+                    color: windAccentColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text('● SAFE TO SAIL', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.neonLime)),
+                  child: Text('● SAFE TO SAIL', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: windAccentColor)),
                 ),
               ],
             ),
@@ -1284,17 +1312,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Border advisory
       final isCaution = imblDist <= 5.0;
       final isCritical = imblDist <= 2.0;
-      final statusColor = isCritical ? AppColors.safetyRed : (isCaution ? AppColors.hazardAmber : AppColors.neonLime);
+      final statusColor = isCritical
+          ? AppColors.safetyRed
+          : (isCaution ? AppColors.hazardAmber : (isDark ? AppColors.neonLime : const Color(0xFF16A34A)));
 
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: const Color(0xCC09293A),
+          color: cardBg,
           borderRadius: BorderRadius.circular(13),
           border: Border.all(color: statusColor.withOpacity(0.8), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: statusColor.withOpacity(0.15),
+              color: statusColor.withOpacity(isDark ? 0.15 : 0.08),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -1320,7 +1350,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const Spacer(),
                 GestureDetector(
                   onTap: () => setState(() => _selectedTelemetryIndex = null),
-                  child: const Icon(Icons.close_rounded, size: 17, color: AppColors.textMuted),
+                  child: Icon(Icons.close_rounded, size: 17, color: closeIconColor),
                 ),
               ],
             ),
@@ -1331,7 +1361,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   : (isCaution
                       ? 'Caution: You are inside the 5.0 km buffer zone (${imblDist.toStringAsFixed(1)} km remaining). Maintain clearance from boundary.'
                       : 'Safe waters: ${imblDist.toStringAsFixed(1)} km clearance to Sri Lanka boundary line. Standard navigation.'),
-              style: const TextStyle(fontSize: 11, color: AppColors.inkLight, height: 1.35),
+              style: TextStyle(fontSize: 11, color: primaryTextColor, height: 1.35),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1339,7 +1369,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   isCaution ? 'Heading: ${_telemetry.headingDeg.toStringAsFixed(0)}° (Eastward)' : 'Buffer: 5.0 km active',
-                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: secondaryTextColor),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -1391,22 +1421,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required bool isSelected,
     VoidCallback? onTap,
   }) {
+    final isDark = ThemeController.isDarkMode.value;
+    final cardBg = isSelected
+        ? (isDark ? const Color(0xFF0F384E) : const Color(0xFFE0F2FE))
+        : (isDark ? const Color(0xFF09293A) : const Color(0xFFF8FAFC));
+    final cardBorder = isSelected
+        ? iconColor
+        : (isDark ? const Color(0xFF173F50) : const Color(0xFFCBD5E1));
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0F384E) : const Color(0xFF09293A),
+          color: cardBg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? iconColor : const Color(0xFF173F50),
+            color: cardBorder,
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: iconColor.withOpacity(0.25),
+                    color: iconColor.withOpacity(isDark ? 0.25 : 0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -1430,38 +1468,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 4),
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.6,
-                    color: AppColors.textMuted,
+                    color: isDark ? AppColors.textMuted : const Color(0xFF475569),
                   ),
                 ),
                 const Spacer(),
                 Icon(
                   isSelected ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
                   size: 13,
-                  color: isSelected ? iconColor : AppColors.textMuted.withOpacity(0.5),
+                  color: isSelected ? iconColor : (isDark ? AppColors.textMuted.withOpacity(0.5) : const Color(0xFF94A3B8)),
                 ),
               ],
             ),
             const SizedBox(height: 3),
             RichText(
               text: TextSpan(
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.inkLight,
+                  color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
                 ),
                 children: [
                   TextSpan(text: value),
                   TextSpan(
                     text: ' $unit',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textMuted,
+                      color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
                     ),
                   ),
                 ],
@@ -1491,6 +1529,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required bool isActive,
     String? badge,
   }) {
+    final isDark = ThemeController.isDarkMode.value;
+    final activeColor = isDark ? AppColors.neonLime : const Color(0xFF0284C7);
+    final inactiveColor = isDark ? const Color(0xFF71969E) : const Color(0xFF64748B);
+
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -1517,7 +1559,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon,
                 style: TextStyle(
                   fontSize: 17,
-                  color: isActive ? AppColors.neonLime : const Color(0xFF71969E),
+                  color: isActive ? activeColor : inactiveColor,
                 ),
               ),
               const SizedBox(height: 2),
@@ -1526,7 +1568,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                   fontSize: 9.5,
                   fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                  color: isActive ? AppColors.neonLime : const Color(0xFF71969E),
+                  color: isActive ? activeColor : inactiveColor,
                 ),
               ),
             ],
