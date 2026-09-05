@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#061c2c" />
+  <title>SeaSentinel | Marine Safety</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <main class="app-shell">
+    <section class="map-panel" aria-label="Live marine map">
+      <div id="map"></div>
+      <header class="topbar">
+        <button class="icon-button menu-button" aria-label="Open menu"><span></span><span></span></button>
+        <div class="brand"><span class="brand-mark">⌁</span><span>Sea<span>Sentinel</span></span></div>
+        <button class="avatar" aria-label="Profile">RK</button>
+      </header>
+
+      <div class="map-status"><i></i> GPS CONNECTED <b>12.9716° N, 80.2432° E</b></div>
+      <button id="recenter" class="locate-control" aria-label="Center on vessel">⌖</button>
+
+      <div class="route-chip"><span class="route-dot"></span>
+        <div><small>ACTIVE ROUTE</small><strong>PFZ · Sector 04</strong></div><span class="arrow">→</span>
+      </div>
+      <div class="layer-control" role="group" aria-label="Map layers">
+        <button class="layer active" data-layer="route"><i class="blue"></i>Route</button>
+        <button class="layer active" data-layer="pfz"><i class="green"></i>PFZ</button>
+        <button class="layer active" data-layer="hazards"><i class="orange"></i>Hazards</button>
+        <button class="layer active" data-layer="border"><i class="red"></i>IMBL</button>
+      </div>
+    </section>
+
+    <section class="command-deck">
+      <div class="deck-handle"></div>
+      <div class="greeting-row">
+        <div>
+          <p class="eyebrow">GOOD MORNING, RAVI</p>
+          <h1>Conditions are <em>favourable.</em></h1>
+        </div><button id="safety-button" class="safety-button">Safety <span>›</span></button>
+      </div>
+      <div class="telemetry" aria-label="Vessel telemetry">
+        <article><span class="metric-icon wave">≈</span>
+          <div><small>WAVE HEIGHT</small><strong>0.8 <b>m</b></strong>
+            <p class="calm">● CALM</p>
+          </div>
+        </article>
+        <article><span class="metric-icon wind">↗</span>
+          <div><small>WIND SPEED</small><strong>12 <b>kt</b></strong>
+            <p>NE · STEADY</p>
+          </div>
+        </article>
+        <article><span class="metric-icon border">⌁</span>
+          <div><small>NEAREST BORDER</small><strong>18.4 <b>km</b></strong>
+            <p class="safe">● SAFE</p>
+          </div>
+        </article>
+      </div>
+      <div class="action-row">
+        <button class="primary-action" id="route-button"><span
+            class="compass">⌖</span><span><small>NAVIGATION</small><strong>Start safe route</strong></span><span
+            class="action-arrow">→</span></button>
+        <button class="mic-action" id="voice-button" aria-label="Ask using voice"><span>⌁</span></button>
+      </div>
+      <nav class="bottom-nav" aria-label="Primary navigation">
+        <button
+          class="active"><span>◉</span>Voyage</button><button><span>◈</span>Explore</button><button><span>◷</span>Alerts<sup>2</sup></button><button><span>◌</span>Profile</button>
+      </nav>
+    </section>
+  </main>
+
+  <aside id="assistant-sheet" class="assistant-sheet" aria-hidden="true">
+    <div class="sheet-dim"></div>
+    <section class="sheet-content">
+      <div class="deck-handle"></div>
+      <div class="sheet-heading">
+        <div>
+          <p class="eyebrow">SEASENTINEL ASSIST</p>
+          <h2>How can I help?</h2>
+        </div><button class="close-sheet" aria-label="Close">×</button>
+      </div>
+      <div id="chat-log" class="chat-log">
+        <div class="bot-message">I’m monitoring your route to PFZ Sector 04. The sea is calm and all boundary clearances
+          are safe.</div>
+      </div>
+      <div class="quick-prompts"><button>Is it safe to leave?</button><button>Show weather risk</button></div>
+      <form id="chat-form" class="chat-input"><input id="chat-message" placeholder="Ask about the sea…"
+          autocomplete="off" /><button aria-label="Send">↑</button></form>
+    </section>
+  </aside>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
