@@ -9,10 +9,10 @@ try:
     from app.geospatial.grid import MarineGrid
     from app.geospatial.distance import haversine_km
 except ImportError:
-    from backend.app.agents.state import AgentState
-    from backend.app.geospatial.astar import astar, path_to_geojson
-    from backend.app.geospatial.grid import MarineGrid
-    from backend.app.geospatial.distance import haversine_km
+    from app.agents.state import AgentState
+    from app.geospatial.astar import astar, path_to_geojson
+    from app.geospatial.grid import MarineGrid
+    from app.geospatial.distance import haversine_km
 
 _COASTLINE_GEOMS = None
 

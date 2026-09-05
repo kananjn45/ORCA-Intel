@@ -7,10 +7,10 @@ try:
     from app.geospatial.geofence import calculate_lookahead
     from app.api.v1.endpoints.geofence import _get_imbl_geometry
 except ImportError:
-    from backend.app.agents.state import AgentState
-    from backend.app.geospatial.distance import distance_to_geometry_km, haversine_km
-    from backend.app.geospatial.geofence import calculate_lookahead
-    from backend.app.api.v1.endpoints.geofence import _get_imbl_geometry
+    from app.agents.state import AgentState
+    from app.geospatial.distance import distance_to_geometry_km, haversine_km
+    from app.geospatial.geofence import calculate_lookahead
+    from app.api.v1.endpoints.geofence import _get_imbl_geometry
 
 
 def boundary_agent_node(state: AgentState) -> AgentState:

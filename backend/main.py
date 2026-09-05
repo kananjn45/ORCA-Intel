@@ -1,7 +1,16 @@
 import json
+import sys
 import time
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+# Ensure both backend/ and parent directory are on sys.path
+_backend_dir = Path(__file__).resolve().parent
+_parent_dir = _backend_dir.parent
+for _p in (str(_backend_dir), str(_parent_dir)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError

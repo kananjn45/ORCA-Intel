@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
-from backend.app.agents.state import AgentState
-from backend.app.agents.guardrails.weather_limits import weather_guardrail
-from backend.app.agents.guardrails.boundary_rules import boundary_guardrail
+from app.agents.state import AgentState
+from app.agents.guardrails.weather_limits import weather_guardrail
+from app.agents.guardrails.boundary_rules import boundary_guardrail
 
 class DeterministicSymbolicGuardrail:
     """

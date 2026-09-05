@@ -3,11 +3,11 @@ try:
 except ImportError:
     pass
 
-from backend.app.agents.state import AgentState
-from backend.app.agents.guardrails.weather_limits import weather_guardrail
-from backend.app.agents.guardrails.boundary_rules import boundary_guardrail
-from backend.app.agents.guardrails.symbolic_verifier import symbolic_verifier
-from backend.app.agents.graph import orca_graph
+from app.agents.state import AgentState
+from app.agents.guardrails.weather_limits import weather_guardrail
+from app.agents.guardrails.boundary_rules import boundary_guardrail
+from app.agents.guardrails.symbolic_verifier import symbolic_verifier
+from app.agents.graph import orca_graph
 
 def test_weather_guardrail_safe():
     weather_data = {
