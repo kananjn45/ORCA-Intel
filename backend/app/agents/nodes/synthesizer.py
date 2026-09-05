@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from backend.app.agents.state import AgentState
+from app.agents.state import AgentState
 
 # Multilingual localized template dictionary for zero-latency deterministic synthesis
 LOCALIZED_TEMPLATES = {

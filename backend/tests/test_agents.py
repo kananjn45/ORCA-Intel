@@ -3,14 +3,14 @@ try:
 except ImportError:
     pass
 
-from backend.app.agents.state import AgentState
-from backend.app.agents.nodes.intent_classifier import intent_classifier_node
-from backend.app.agents.nodes.weather_agent import weather_agent_node
-from backend.app.agents.nodes.pfz_agent import pfz_agent_node
-from backend.app.agents.nodes.boundary_agent import boundary_agent_node
-from backend.app.agents.nodes.routing_agent import routing_agent_node
-from backend.app.agents.nodes.synthesizer import response_synthesizer_node
-from backend.app.agents.graph import orca_graph
+from app.agents.state import AgentState
+from app.agents.nodes.intent_classifier import intent_classifier_node
+from app.agents.nodes.weather_agent import weather_agent_node
+from app.agents.nodes.pfz_agent import pfz_agent_node
+from app.agents.nodes.boundary_agent import boundary_agent_node
+from app.agents.nodes.routing_agent import routing_agent_node
+from app.agents.nodes.synthesizer import response_synthesizer_node
+from app.agents.graph import orca_graph
 
 def test_intent_classifier_english():
     state: AgentState = {

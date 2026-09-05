@@ -1,6 +1,6 @@
 import re
 from typing import List
-from backend.app.agents.state import AgentState
+from app.agents.state import AgentState
 
 # Multilingual keyword mappings for resilient intent parsing
 INTENT_KEYWORD_MAP = {

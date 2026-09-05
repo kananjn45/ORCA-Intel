@@ -5,8 +5,8 @@ try:
     from app.agents.state import AgentState
     from app.services.open_meteo import get_marine_weather
 except ImportError:
-    from backend.app.agents.state import AgentState
-    from backend.app.services.open_meteo import get_marine_weather
+    from app.agents.state import AgentState
+    from app.services.open_meteo import get_marine_weather
 
 
 def weather_agent_node(state: AgentState) -> AgentState:
