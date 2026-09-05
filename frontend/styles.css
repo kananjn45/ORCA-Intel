@@ -1,0 +1,636 @@
+:root {
+    --ink: #e9f5f4;
+    --muted: #9eb6bd;
+    --navy: #061c2c;
+    --navy2: #082537;
+    --lime: #c8fa62;
+    --teal: #2cd6c8;
+    --orange: #ff9f5a;
+    --red: #ff7068;
+}
+
+.boat {
+    color: #c8fa62;
+    font-size: 27px;
+    text-shadow: 0 0 12px #c8fa62;
+    transform: rotate(40deg)
+}
+
+.map-label,
+.border-label {
+    background: #082a38d9 !important;
+    border: 1px solid #2d6574 !important;
+    color: #e5f6f5 !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    font: 10px Manrope !important;
+    padding: 5px 7px !important
+}
+
+.border-label {
+    color: #ff9992 !important;
+    border-color: #a94e4a !important
+}
+
+.map-label:before,
+.border-label:before {
+    display: none !important
+}
+
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    background: #041723;
+    color: var(--ink);
+    font-family: Manrope, Arial, sans-serif
+}
+
+button,
+input {
+    font: inherit
+}
+
+button {
+    cursor: pointer;
+    border: 0
+}
+
+.app-shell {
+    min-height: 100dvh;
+    max-width: 520px;
+    margin: auto;
+    position: relative;
+    overflow: hidden;
+    background: var(--navy)
+}
+
+.map-panel {
+    height: 56dvh;
+    min-height: 430px;
+    position: relative;
+    background: #082e41
+}
+
+#map {
+    position: absolute;
+    inset: 0;
+    z-index: 0
+}
+
+.leaflet-control-attribution {
+    display: none
+}
+
+.leaflet-container {
+    background: #082e41;
+    font-family: Manrope
+}
+
+.topbar {
+    position: absolute;
+    z-index: 2;
+    top: max(18px, env(safe-area-inset-top));
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.icon-button,
+.avatar,
+.locate-control {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(4, 25, 38, .86);
+    color: #fff;
+    box-shadow: 0 5px 20px #00121c66
+}
+
+.menu-button {
+    display: grid;
+    place-content: center;
+    gap: 5px
+}
+
+.menu-button span {
+    display: block;
+    width: 17px;
+    height: 1.5px;
+    background: #d9f2f1
+}
+
+.menu-button span:last-child {
+    width: 11px
+}
+
+.brand {
+    font-weight: 800;
+    letter-spacing: -.7px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px
+}
+
+.brand>span:last-child span {
+    color: var(--lime)
+}
+
+.brand-mark {
+    font-size: 25px;
+    color: var(--lime);
+    transform: rotate(-20deg);
+    line-height: 1
+}
+
+.avatar {
+    font: 700 11px 'DM Mono';
+    border: 1px solid #75a5ab
+}
+
+.map-status {
+    position: absolute;
+    z-index: 2;
+    top: 82px;
+    left: 20px;
+    font: 10px 'DM Mono';
+    letter-spacing: .5px;
+    color: #d8f2ef;
+    background: #082a38d9;
+    padding: 8px 10px;
+    border-radius: 7px
+}
+
+.map-status i {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--lime);
+    border-radius: 50%;
+    margin-right: 5px
+}
+
+.map-status b {
+    display: block;
+    color: #8eafb5;
+    font-weight: 400;
+    margin-top: 4px;
+    padding-left: 11px
+}
+
+.locate-control {
+    position: absolute;
+    z-index: 2;
+    right: 20px;
+    bottom: 118px;
+    font-size: 25px;
+    color: var(--teal)
+}
+
+.route-chip {
+    z-index: 2;
+    position: absolute;
+    bottom: 22px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #072b3cdd;
+    border: 1px solid #287082;
+    border-radius: 14px;
+    backdrop-filter: blur(10px)
+}
+
+.route-chip small,
+.eyebrow,
+.telemetry small {
+    font: 500 9px 'DM Mono';
+    letter-spacing: 1.05px;
+    color: #8badb2
+}
+
+.route-chip strong {
+    display: block;
+    font-size: 12px
+}
+
+.route-dot {
+    width: 9px;
+    height: 9px;
+    background: var(--lime);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px #c8fa6225
+}
+
+.route-chip .arrow {
+    margin-left: auto;
+    color: var(--lime);
+    font-size: 21px
+}
+
+.layer-control {
+    position: absolute;
+    z-index: 2;
+    right: 19px;
+    top: 143px;
+    display: grid;
+    gap: 6px
+}
+
+.layer {
+    background: #082a38e8;
+    border: 1px solid #245667;
+    color: #cae5e4;
+    font-size: 10px;
+    padding: 7px 9px;
+    border-radius: 7px;
+    text-align: left
+}
+
+.layer:not(.active) {
+    opacity: .45
+}
+
+.layer i {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 5px;
+    border-radius: 50%
+}
+
+.blue {
+    background: #63baff
+}
+
+.green {
+    background: var(--lime)
+}
+
+.orange {
+    background: var(--orange)
+}
+
+.red {
+    background: var(--red)
+}
+
+.command-deck {
+    position: relative;
+    z-index: 3;
+    margin-top: -19px;
+    background: linear-gradient(135deg, #062033, #061b2b);
+    border-radius: 23px 23px 0 0;
+    padding: 10px 20px max(12px, env(safe-area-inset-bottom));
+    min-height: 44dvh
+}
+
+.deck-handle {
+    height: 4px;
+    width: 38px;
+    background: #466875;
+    border-radius: 8px;
+    margin: 0 auto 18px
+}
+
+.greeting-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: start
+}
+
+.greeting-row h1 {
+    margin: 5px 0 17px;
+    font-size: 20px;
+    letter-spacing: -.75px
+}
+
+.greeting-row em {
+    color: var(--lime);
+    font-style: normal
+}
+
+.safety-button {
+    margin-top: 3px;
+    background: #173a47;
+    color: #bde1df;
+    border: 1px solid #2c5963;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 10px;
+    font-weight: 700
+}
+
+.safety-button span {
+    color: var(--lime);
+    font-size: 16px;
+    vertical-align: -1px
+}
+
+.telemetry {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1.2fr;
+    gap: 7px
+}
+
+.telemetry article {
+    min-width: 0;
+    background: #09293a;
+    border: 1px solid #173f50;
+    border-radius: 12px;
+    padding: 10px 8px;
+    display: flex;
+    gap: 7px
+}
+
+.metric-icon {
+    font-size: 19px;
+    width: 19px;
+    color: #73d8ef
+}
+
+.metric-icon.wave {
+    color: #72d5ff
+}
+
+.metric-icon.wind {
+    color: #d4f678
+}
+
+.metric-icon.border {
+    color: #78e1ce
+}
+
+.telemetry small {
+    font-size: 7.3px;
+    letter-spacing: .6px;
+    white-space: nowrap
+}
+
+.telemetry strong {
+    font-size: 16px;
+    line-height: 1.35;
+    white-space: nowrap
+}
+
+.telemetry strong b {
+    font-size: 9px;
+    color: #a0bac0
+}
+
+.telemetry p {
+    font: 8px 'DM Mono';
+    color: #a0bac0;
+    margin: 1px 0 0;
+    white-space: nowrap
+}
+
+.telemetry .calm,
+.telemetry .safe {
+    color: var(--lime)
+}
+
+.action-row {
+    display: flex;
+    gap: 9px;
+    margin: 15px 0 17px
+}
+
+.primary-action {
+    flex: 1;
+    border-radius: 13px;
+    text-align: left;
+    padding: 10px 13px;
+    background: var(--lime);
+    color: #092238;
+    display: flex;
+    align-items: center;
+    gap: 9px
+}
+
+.compass {
+    font-size: 27px
+}
+
+.primary-action small {
+    display: block;
+    font: 8px 'DM Mono';
+    letter-spacing: 1px;
+    opacity: .65
+}
+
+.primary-action strong {
+    font-size: 12px
+}
+
+.action-arrow {
+    margin-left: auto;
+    font-size: 20px
+}
+
+.mic-action {
+    width: 49px;
+    border-radius: 13px;
+    background: #123949;
+    color: var(--lime);
+    font-size: 27px;
+    border: 1px solid #286070
+}
+
+.bottom-nav {
+    border-top: 1px solid #183747;
+    display: flex;
+    justify-content: space-between;
+    padding-top: 12px
+}
+
+.bottom-nav button {
+    position: relative;
+    background: none;
+    color: #71969e;
+    font-size: 9px;
+    display: grid;
+    gap: 4px;
+    justify-items: center
+}
+
+.bottom-nav button span {
+    font-size: 16px
+}
+
+.bottom-nav .active {
+    color: var(--lime)
+}
+
+.bottom-nav sup {
+    position: absolute;
+    top: -4px;
+    right: -5px;
+    background: var(--red);
+    color: #fff;
+    border-radius: 50%;
+    font: 8px 'DM Mono';
+    padding: 2px 4px
+}
+
+.assistant-sheet {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: .25s
+}
+
+.assistant-sheet.open {
+    opacity: 1;
+    pointer-events: auto
+}
+
+.sheet-dim {
+    position: absolute;
+    inset: 0;
+    background: #00101ab9
+}
+
+.sheet-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 520px;
+    margin: auto;
+    min-height: 55dvh;
+    border-radius: 24px 24px 0 0;
+    background: #082537;
+    padding: 10px 20px max(20px, env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: .3s cubic-bezier(.2, .8, .2, 1)
+}
+
+.open .sheet-content {
+    transform: none
+}
+
+.sheet-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: start
+}
+
+.sheet-heading h2 {
+    margin: 3px 0 16px;
+    font-size: 22px
+}
+
+.close-sheet {
+    background: #143d4d;
+    color: #e5f2f2;
+    border-radius: 50%;
+    font-size: 24px;
+    width: 33px;
+    height: 33px
+}
+
+.chat-log {
+    height: 160px;
+    overflow: auto
+}
+
+.bot-message {
+    font-size: 13px;
+    line-height: 1.55;
+    background: #10394a;
+    border: 1px solid #245869;
+    padding: 11px;
+    border-radius: 4px 13px 13px 13px;
+    max-width: 88%
+}
+
+.user-message {
+    margin: 9px 0 9px auto;
+    background: #c8fa62;
+    color: #082537;
+    padding: 9px 11px;
+    border-radius: 13px 4px 13px 13px;
+    width: max-content;
+    max-width: 80%;
+    font-size: 13px
+}
+
+.quick-prompts {
+    display: flex;
+    gap: 6px;
+    margin: 11px 0
+}
+
+.quick-prompts button {
+    background: #12394a;
+    color: #bce1df;
+    border: 1px solid #28606d;
+    border-radius: 16px;
+    padding: 6px 9px;
+    font-size: 10px
+}
+
+.chat-input {
+    display: flex;
+    gap: 7px;
+    border: 1px solid #2a5c6b;
+    background: #061e2e;
+    border-radius: 13px;
+    padding: 5px
+}
+
+.chat-input input {
+    min-width: 0;
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: #fff;
+    padding: 7px
+}
+
+.chat-input button {
+    background: var(--lime);
+    color: #062033;
+    width: 33px;
+    border-radius: 9px;
+    font-size: 19px
+}
+
+@media(min-width:700px) {
+    body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        background: radial-gradient(circle at 50% 20%, #123b50, #03131f 65%)
+    }
+
+    .app-shell {
+        min-height: 850px;
+        border-radius: 28px;
+        box-shadow: 0 30px 100px #000a
+    }
+
+    .command-deck {
+        min-height: 374px
+    }
+
+    .assistant-sheet {
+        max-width: 520px;
+        left: 50%;
+        right: auto;
+        width: 520px;
+        transform: translateX(-50%)
+    }
+}

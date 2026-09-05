@@ -13,6 +13,7 @@ against (mirrors docs/BACKEND_SCHEMA.md exactly), so:
 Do not duplicate these models elsewhere — import from here.
 """
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
@@ -179,3 +180,101 @@ class OfflinePackResponse(BaseModel):
     )
     grid_resolution_deg: float = Field(default=0.1, description="Sampling step for the weather grid")
     cell_count: int = Field(default=0)
+
+
+# 7. Voice Pipeline Models (Dev 4 — Bhashini ASR / NMT / TTS)
+
+class LanguageCode(str, Enum):
+    """ISO 639-1 language codes supported by ORCA's voice pipeline."""
+    HINDI = "hi"
+    TAMIL = "ta"
+    TELUGU = "te"
+    BENGALI = "bn"
+    GUJARATI = "gu"
+    KANNADA = "kn"
+    MALAYALAM = "ml"
+    MARATHI = "mr"
+    ODIA = "or"
+    PUNJABI = "pa"
+    ENGLISH = "en"
+
+
+LANGUAGE_NAMES: dict[str, str] = {
+    "hi": "Hindi",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "bn": "Bengali",
+    "gu": "Gujarati",
+    "kn": "Kannada",
+    "ml": "Malayalam",
+    "mr": "Marathi",
+    "or": "Odia",
+    "pa": "Punjabi",
+    "en": "English",
+}
+
+
+class ASRRequest(BaseModel):
+    """Incoming request for speech-to-text transcription."""
+    audio_content: str = Field(..., description="Base64-encoded audio bytes.")
+    language: str = Field(..., description="ISO 639-1 source language code (e.g. 'ta', 'hi').")
+    audio_format: str = Field(default="wav", description="Audio container format: 'wav', 'pcm', 'flac', 'mp3'.")
+    sample_rate: int = Field(default=16000, description="Sample rate in Hz.")
+
+
+class ASRResult(BaseModel):
+    """Result of a speech-to-text transcription."""
+    text: str = Field(..., description="Recognised transcript text.")
+    language: str = Field(..., description="Language code of the recognised speech.")
+    is_mock: bool = Field(default=False, description="True when produced by the mock engine.")
+    confidence: Optional[float] = Field(default=None, description="Optional confidence score (0.0-1.0).")
+
+
+class NMTRequest(BaseModel):
+    """Incoming request for text translation."""
+    text: str = Field(..., description="Source text to translate.")
+    source_language: str = Field(..., description="Source language code.")
+    target_language: str = Field(..., description="Target language code.")
+
+
+class NMTResult(BaseModel):
+    """Result of a text translation."""
+    translated_text: str
+    source_language: str
+    target_language: str
+    is_mock: bool = False
+
+
+class TTSRequest(BaseModel):
+    """Incoming request for speech synthesis."""
+    text: str = Field(..., description="Text to synthesise.")
+    language: str = Field(..., description="Language code for synthesis.")
+    gender: str = Field(default="female", description="Voice gender preference.")
+    audio_format: str = Field(default="wav", description="Desired output format.")
+
+
+class TTSResult(BaseModel):
+    """Result of a text-to-speech synthesis."""
+    audio_content: str = Field(..., description="Base64-encoded audio bytes.")
+    language: str
+    audio_format: str = "wav"
+    is_mock: bool = False
+
+
+class VoicePipelineResult(BaseModel):
+    """Combined result of the ASR -> NMT pipeline."""
+    transcript: str = Field(..., description="Original regional-language transcript.")
+    translated_text: str = Field(..., description="Translated text (typically English).")
+    source_language: str
+    target_language: str
+    is_mock: bool = False
+
+
+class ResponsePipelineResult(BaseModel):
+    """Combined result of the NMT -> TTS pipeline."""
+    translated_text: str = Field(..., description="Translated regional-language text.")
+    audio_content: str = Field(..., description="Base64-encoded WAV audio.")
+    source_language: str
+    target_language: str
+    audio_format: str = "wav"
+    is_mock: bool = False
