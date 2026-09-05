@@ -1,0 +1,126 @@
+{
+  "type": "FeatureCollection",
+  "name": "incois_pfz_granule_tamil_nadu",
+  "granule_id": "INCOIS-PFZ-GRANULE-TN-20241112",
+  "satellite_sensors": ["Oceansat-3 OCM-3", "MODIS-Aqua", "INSAT-3D TIR"],
+  "orbit_pass_time": "2024-11-12T06:32:45Z",
+  "valid_until": "2024-11-15T06:00:00Z",
+  "region": "Tamil Nadu Coastal Waters (Palk Bay, Gulf of Mannar & Chennai Shelf)",
+  "source": "INCOIS (Cached Satellite Feed)",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-TN-20241112-001",
+        "sector_name": "Palk Bay South Zone",
+        "centroid": {
+          "lat": 9.4200,
+          "lon": 79.5500
+        },
+        "distance_km": 14.2,
+        "bearing_deg": 65.0,
+        "chlorophyll_mg_m3": 2.15,
+        "sst_gradient_celsius": 1.25,
+        "depth_m": 18.5,
+        "valid_until": "2024-11-15T06:00:00Z",
+        "target_species": [
+          "Sardinella longiceps (Indian Oil Sardine)",
+          "Rastrelliger kanagurta (Indian Mackerel)",
+          "Penaeus semisulcatus (Green Tiger Prawn)"
+        ],
+        "thermal_front_type": "Palk Strait Inter-Basin Tidal Front",
+        "confidence_level": "VERY_HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [79.5100, 9.4000],
+            [79.5900, 9.4100],
+            [79.6000, 9.4500],
+            [79.5300, 9.4600],
+            [79.4900, 9.4200],
+            [79.5100, 9.4000]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-TN-20241112-002",
+        "sector_name": "Gulf of Mannar Deep Shelf",
+        "centroid": {
+          "lat": 9.0800,
+          "lon": 79.3200
+        },
+        "distance_km": 21.0,
+        "bearing_deg": 175.0,
+        "chlorophyll_mg_m3": 1.75,
+        "sst_gradient_celsius": 0.95,
+        "depth_m": 32.0,
+        "valid_until": "2024-11-15T06:00:00Z",
+        "target_species": [
+          "Katsuwonus pelamis (Skipjack Tuna)",
+          "Carangidae (Trevally)",
+          "Lethrinus nebulosus (Spangled Emperor)"
+        ],
+        "thermal_front_type": "Bathymetric Slope Upwelling",
+        "confidence_level": "HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [79.2800, 9.0500],
+            [79.3600, 9.0600],
+            [79.3700, 9.1100],
+            [79.2900, 9.1200],
+            [79.2600, 9.0800],
+            [79.2800, 9.0500]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-TN-20241112-003",
+        "sector_name": "Coromandel Offshore / Chennai Approach",
+        "centroid": {
+          "lat": 12.6000,
+          "lon": 80.6800
+        },
+        "distance_km": 36.5,
+        "bearing_deg": 115.0,
+        "chlorophyll_mg_m3": 1.55,
+        "sst_gradient_celsius": 0.85,
+        "depth_m": 45.0,
+        "valid_until": "2024-11-15T06:00:00Z",
+        "target_species": [
+          "Thunnus tonggol (Longtail Tuna)",
+          "Coryphaena hippurus (Mahi Mahi)",
+          "Decapterus russelli (Indian Scad)"
+        ],
+        "thermal_front_type": "East India Coastal Current Front",
+        "confidence_level": "HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [80.6100, 12.5500],
+            [80.7500, 12.5700],
+            [80.7600, 12.6500],
+            [80.6600, 12.6600],
+            [80.5900, 12.6100],
+            [80.6100, 12.5500]
+          ]
+        ]
+      }
+    }
+  ]
+}

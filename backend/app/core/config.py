@@ -66,7 +66,10 @@ class Settings(BaseSettings):
     OPEN_METEO_FORECAST_BASE_URL: str = "https://api.open-meteo.com/v1/forecast"
     OPEN_METEO_TIMEOUT_SECONDS: float = 10.0
     INCOIS_PFZ_API_URL: str = "https://incois.gov.in/portal/datainfo/pfz.jsp"
-    INCOIS_USE_MOCK: bool = True
+    INCOIS_ERDDAP_BASE_URL: str = "https://erddap.incois.gov.in/erddap"
+    INCOIS_WFS_BASE_URL: str = "https://incois.gov.in/geoserver/wfs"
+    INCOIS_TIMEOUT_SECONDS: float = 4.0
+    INCOIS_USE_MOCK: bool = False
 
     # In-Memory / Redis Caching
     WEATHER_CACHE_TTL_SECONDS: int = 900       # 15 minutes

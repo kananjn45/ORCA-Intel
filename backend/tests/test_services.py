@@ -163,6 +163,30 @@ class TestINCOISPFZMock:
         stats = get_pfz_cache().stats()
         assert stats["hits"] >= 1
 
+    def test_pfz_source_is_incois_cached_satellite_feed(self):
+        """Verify features fallback to real satellite granules tagged with INCOIS (Cached Satellite Feed)."""
+        from app.services.incois_pfz import get_pfz_features
+        features = self._run(get_pfz_features(9.28, 79.31, radius_km=50, use_cache=False))
+        assert len(features) >= 1
+        assert features[0].source == "INCOIS (Cached Satellite Feed)"
+
+    def test_pfz_gujarat_granule_spatial_query(self):
+        """Querying Gujarat waters (Porbandar/Veraval) returns Gujarat real satellite granules."""
+        from app.services.incois_pfz import get_pfz_features
+        features = self._run(get_pfz_features(21.52, 69.41, radius_km=80, use_cache=False))
+        assert len(features) >= 1
+        assert any("GUJ" in f.pfz_id or "Porbandar" in f.sector_name or "Veraval" in f.sector_name for f in features)
+        assert features[0].source == "INCOIS (Cached Satellite Feed)"
+
+    def test_pfz_andhra_pradesh_granule_spatial_query(self):
+        """Querying Andhra Pradesh waters (Visakhapatnam) returns AP real satellite granules."""
+        from app.services.incois_pfz import get_pfz_features
+        features = self._run(get_pfz_features(17.58, 83.42, radius_km=80, use_cache=False))
+        assert len(features) >= 1
+        assert any("AP" in f.pfz_id or "Visakhapatnam" in f.sector_name or "Kakinada" in f.sector_name for f in features)
+        assert features[0].source == "INCOIS (Cached Satellite Feed)"
+
+
 
 # ---------------------------------------------------------------------------
 # open_meteo.py tests (uses synthetic fallback — no real network needed)

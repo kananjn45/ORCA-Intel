@@ -1,0 +1,126 @@
+{
+  "type": "FeatureCollection",
+  "name": "incois_pfz_granule_gujarat",
+  "granule_id": "INCOIS-PFZ-GRANULE-GUJ-20241018",
+  "satellite_sensors": ["Oceansat-3 OCM-3", "INSAT-3D TIR", "MODIS-Aqua"],
+  "orbit_pass_time": "2024-10-18T06:14:22Z",
+  "valid_until": "2024-10-21T06:00:00Z",
+  "region": "Gujarat Coastal Shelf (Saurashtra & Gulf of Khambhat)",
+  "source": "INCOIS (Cached Satellite Feed)",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-GUJ-20241018-001",
+        "sector_name": "Porbandar Offshore Bank",
+        "centroid": {
+          "lat": 21.5200,
+          "lon": 69.4100
+        },
+        "distance_km": 28.4,
+        "bearing_deg": 245.0,
+        "chlorophyll_mg_m3": 2.35,
+        "sst_gradient_celsius": 1.35,
+        "depth_m": 42.0,
+        "valid_until": "2024-10-21T06:00:00Z",
+        "target_species": [
+          "Pampus argenteus (Silver Pomfret)",
+          "Trichiurus lepturus (Largehead Hairtail / Ribbonfish)",
+          "Scomberomorus commerson (Narrow-barred Spanish Mackerel)"
+        ],
+        "thermal_front_type": "Persistent Coastal Upwelling Front",
+        "confidence_level": "VERY_HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [69.3400, 21.4800],
+            [69.4700, 21.4900],
+            [69.5000, 21.5600],
+            [69.4100, 21.5800],
+            [69.3200, 21.5300],
+            [69.3400, 21.4800]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-GUJ-20241018-002",
+        "sector_name": "Veraval South Shelf",
+        "centroid": {
+          "lat": 20.7800,
+          "lon": 70.2800
+        },
+        "distance_km": 34.8,
+        "bearing_deg": 195.0,
+        "chlorophyll_mg_m3": 1.95,
+        "sst_gradient_celsius": 1.10,
+        "depth_m": 38.5,
+        "valid_until": "2024-10-21T06:00:00Z",
+        "target_species": [
+          "Harpadon nehereus (Bombay Duck)",
+          "Nemipterus japonicus (Japanese Threadfin Bream)",
+          "Parastromateus niger (Black Pomfret)"
+        ],
+        "thermal_front_type": "Cyclonic Eddy Edge Gradient",
+        "confidence_level": "HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [70.2100, 20.7300],
+            [70.3400, 20.7500],
+            [70.3600, 20.8200],
+            [70.2600, 20.8400],
+            [70.1900, 20.7800],
+            [70.2100, 20.7300]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-GUJ-20241018-003",
+        "sector_name": "Okha Head Navigational Corridor",
+        "centroid": {
+          "lat": 22.3800,
+          "lon": 68.9500
+        },
+        "distance_km": 19.2,
+        "bearing_deg": 310.0,
+        "chlorophyll_mg_m3": 1.65,
+        "sst_gradient_celsius": 0.85,
+        "depth_m": 26.0,
+        "valid_until": "2024-10-21T06:00:00Z",
+        "target_species": [
+          "Lates calcarifer (Asian Seabass)",
+          "Eleutheronema tetradactylum (Fourfinger Threadfin)",
+          "Penaeus monodon (Giant Tiger Prawn)"
+        ],
+        "thermal_front_type": "Tidal Estuarine Plume Boundary",
+        "confidence_level": "HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [68.8900, 22.3400],
+            [69.0100, 22.3500],
+            [69.0300, 22.4200],
+            [68.9300, 22.4300],
+            [68.8700, 22.3800],
+            [68.8900, 22.3400]
+          ]
+        ]
+      }
+    }
+  ]
+}

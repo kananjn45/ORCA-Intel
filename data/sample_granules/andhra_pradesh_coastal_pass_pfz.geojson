@@ -1,0 +1,126 @@
+{
+  "type": "FeatureCollection",
+  "name": "incois_pfz_granule_andhra_pradesh",
+  "granule_id": "INCOIS-PFZ-GRANULE-AP-20241104",
+  "satellite_sensors": ["Oceansat-3 OCM-3", "Suomi-NPP VIIRS", "INSAT-3DR"],
+  "orbit_pass_time": "2024-11-04T05:48:10Z",
+  "valid_until": "2024-11-07T06:00:00Z",
+  "region": "Andhra Pradesh Offshore Waters (Visakhapatnam & Godavari Shelf)",
+  "source": "INCOIS (Cached Satellite Feed)",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-AP-20241104-001",
+        "sector_name": "Visakhapatnam Deep Trench Edge",
+        "centroid": {
+          "lat": 17.5800,
+          "lon": 83.4200
+        },
+        "distance_km": 24.1,
+        "bearing_deg": 125.0,
+        "chlorophyll_mg_m3": 2.75,
+        "sst_gradient_celsius": 1.55,
+        "depth_m": 68.0,
+        "valid_until": "2024-11-07T06:00:00Z",
+        "target_species": [
+          "Thunnus albacares (Yellowfin Tuna)",
+          "Coryphaena hippurus (Mahi Mahi / Dolphinfish)",
+          "Xiphias gladius (Swordfish)"
+        ],
+        "thermal_front_type": "Shelf Break Frontal Upwelling",
+        "confidence_level": "VERY_HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [83.3500, 17.5300],
+            [83.4900, 17.5400],
+            [83.5100, 17.6200],
+            [83.4000, 17.6400],
+            [83.3300, 17.5900],
+            [83.3500, 17.5300]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-AP-20241104-002",
+        "sector_name": "Kakinada Bay Outer Basin",
+        "centroid": {
+          "lat": 16.8900,
+          "lon": 82.5200
+        },
+        "distance_km": 18.7,
+        "bearing_deg": 98.0,
+        "chlorophyll_mg_m3": 2.10,
+        "sst_gradient_celsius": 1.20,
+        "depth_m": 34.0,
+        "valid_until": "2024-11-07T06:00:00Z",
+        "target_species": [
+          "Rastrelliger kanagurta (Indian Mackerel)",
+          "Scomberomorus guttatus (Indo-Pacific King Mackerel)",
+          "Portunus pelagicus (Blue Swimmer Crab)"
+        ],
+        "thermal_front_type": "Godavari Riverine Plume Boundary",
+        "confidence_level": "HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [82.4600, 16.8400],
+            [82.5800, 16.8600],
+            [82.6000, 16.9400],
+            [82.5100, 16.9500],
+            [82.4400, 16.9000],
+            [82.4600, 16.8400]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "pfz_id": "PFZ-AP-20241104-003",
+        "sector_name": "Machilipatnam Shoals",
+        "centroid": {
+          "lat": 16.1200,
+          "lon": 81.3500
+        },
+        "distance_km": 22.0,
+        "bearing_deg": 140.0,
+        "chlorophyll_mg_m3": 1.80,
+        "sst_gradient_celsius": 0.95,
+        "depth_m": 29.0,
+        "valid_until": "2024-11-07T06:00:00Z",
+        "target_species": [
+          "Lutjanus argentimaculatus (Mangrove Red Snapper)",
+          "Sardinella gibbosa (Goldstripe Sardinella)",
+          "Carangoides armatus (Longfin Trevally)"
+        ],
+        "thermal_front_type": "Krishna Delta Discharge Front",
+        "confidence_level": "HIGH",
+        "source": "INCOIS (Cached Satellite Feed)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [81.2800, 16.0700],
+            [81.4100, 16.0900],
+            [81.4300, 16.1700],
+            [81.3300, 16.1800],
+            [81.2700, 16.1300],
+            [81.2800, 16.0700]
+          ]
+        ]
+      }
+    }
+  ]
+}
