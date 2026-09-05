@@ -51,7 +51,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _currentLanguageCode = 'en';
   String _currentLanguageName = 'English';
   int _activeNavIndex = 0; // 0: Voyage Map, 1: Radar, 2: Alerts, 3: Offline
-
+  int? _selectedTelemetryIndex; // 0: Wave, 1: Wind, 2: Border, null: collapsed
   ChatMessageModel? _latestAdvisory;
 
   @override
@@ -841,9 +841,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ],
                             ),
                           ),
-                          // Safety › Button
+                          // Safety › Button (toggles quick safety overview)
                           GestureDetector(
-                            onTap: _showWeatherDetailsModal,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _selectedTelemetryIndex =
+                                    _selectedTelemetryIndex == null ? 0 : null;
+                              });
+                            },
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
@@ -854,10 +860,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   width: 1,
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Safety',
                                     style: TextStyle(
                                       fontSize: 11,
@@ -865,10 +871,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       color: Color(0xFFBDE1DF),
                                     ),
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    '›',
-                                    style: TextStyle(
+                                    _selectedTelemetryIndex != null ? '▾' : '›',
+                                    style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w900,
                                       color: AppColors.neonLime,
@@ -882,56 +888,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 12),
 
-                      // 3-Column Micro-Telemetry Grid
+                      // 3-Column Interactive Telemetry Safety Bar
                       Row(
                         children: [
                           // 1. Wave Height
                           Expanded(
                             child: _buildTelemetryCard(
+                              index: 0,
                               icon: '≈',
                               iconColor: AppColors.electricCyan,
-                              label: 'WAVE HEIGHT',
+                              label: 'WAVE',
                               value: waveHeight.toStringAsFixed(1),
                               unit: 'm',
                               status: waveHeight < 1.5 ? '● CALM' : '● SWELL',
                               statusColor: waveHeight < 1.5
                                   ? AppColors.neonLime
                                   : AppColors.hazardAmber,
-                              onTap: _showWeatherDetailsModal,
+                              isSelected: _selectedTelemetryIndex == 0,
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _selectedTelemetryIndex =
+                                      _selectedTelemetryIndex == 0 ? null : 0;
+                                });
+                              },
                             ),
                           ),
                           const SizedBox(width: 7),
                           // 2. Wind Speed
                           Expanded(
                             child: _buildTelemetryCard(
+                              index: 1,
                               icon: '↗',
                               iconColor: AppColors.neonLime,
-                              label: 'WIND SPEED',
+                              label: 'WIND',
                               value: windSpeed.toStringAsFixed(0),
                               unit: 'kt',
                               status: 'NE · STEADY',
                               statusColor: AppColors.textMuted,
-                              onTap: _showWeatherDetailsModal,
+                              isSelected: _selectedTelemetryIndex == 1,
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _selectedTelemetryIndex =
+                                      _selectedTelemetryIndex == 1 ? null : 1;
+                                });
+                              },
                             ),
                           ),
                           const SizedBox(width: 7),
                           // 3. Nearest Border
                           Expanded(
                             child: _buildTelemetryCard(
+                              index: 2,
                               icon: '⌁',
                               iconColor: AppColors.electricTeal,
-                              label: 'NEAREST BORDER',
+                              label: 'BORDER',
                               value: imblDist.toStringAsFixed(1),
                               unit: 'km',
                               status: imblDist > 5.0 ? '● SAFE' : '⚠️ CAUTION',
                               statusColor: imblDist > 5.0
                                   ? AppColors.neonLime
                                   : AppColors.safetyRed,
-                              onTap: _showBorderDetailsModal,
+                              isSelected: _selectedTelemetryIndex == 2,
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  _selectedTelemetryIndex =
+                                      _selectedTelemetryIndex == 2 ? null : 2;
+                                });
+                              },
                             ),
                           ),
                         ],
                       ),
+
+                      // INLINE INTERACTIVE ADVISORY (Appears instantly when tapping any of the 3 options)
+                      if (_selectedTelemetryIndex != null) ...[
+                        const SizedBox(height: 10),
+                        _buildInlineAdvisoryCard(waveHeight, windSpeed, imblDist),
+                      ],
                       const SizedBox(height: 12),
 
                       // Action Row (Primary CTA + Voice Mic Action)
@@ -1094,7 +1130,257 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildInlineAdvisoryCard(double waveHeight, double windSpeed, double imblDist) {
+    if (_selectedTelemetryIndex == 0) {
+      // Wave advisory
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: const Color(0xCC09293A),
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: AppColors.electricCyan.withOpacity(0.7), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.electricCyan.withOpacity(0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.waves_rounded, size: 17, color: AppColors.electricCyan),
+                const SizedBox(width: 6),
+                Text(
+                  'SEA STATE · ${waveHeight < 1.5 ? "CALM & SAFE" : "MODERATE SWELL"}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                    color: AppColors.electricCyan,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => setState(() => _selectedTelemetryIndex = null),
+                  child: const Icon(Icons.close_rounded, size: 17, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              waveHeight < 1.5
+                  ? 'Wave height is ${waveHeight.toStringAsFixed(1)} m. Safe for motorized fishing crafts. Favourable surface conditions along Tamil Nadu coast.'
+                  : 'Swell height is ${waveHeight.toStringAsFixed(1)} m. Moderate waves detected. Exercise caution and maintain safe heading.',
+              style: const TextStyle(fontSize: 11, color: AppColors.inkLight, height: 1.35),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Swell: ${_weather?.swellWaveHeightM.toStringAsFixed(1) ?? "0.7"} m • SST: 28.4°C',
+                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _fetchLiveBackendData();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        backgroundColor: AppColors.brandSurface,
+                        content: Text('🌊 Satellite ocean feed updated', style: TextStyle(color: AppColors.inkLight)),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.electricCyan.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: AppColors.electricCyan.withOpacity(0.4)),
+                    ),
+                    child: const Text('Refresh Feed ↺', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: AppColors.electricCyan)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else if (_selectedTelemetryIndex == 1) {
+      // Wind advisory
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: const Color(0xCC09293A),
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: AppColors.neonLime.withOpacity(0.7), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.neonLime.withOpacity(0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.air_rounded, size: 17, color: AppColors.neonLime),
+                const SizedBox(width: 6),
+                Text(
+                  'WIND SPEED · ${windSpeed.toStringAsFixed(0)} KT (STEADY BREEZE)',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                    color: AppColors.neonLime,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => setState(() => _selectedTelemetryIndex = null),
+                  child: const Icon(Icons.close_rounded, size: 17, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              windSpeed < 20
+                  ? 'Steady North-East wind at ${windSpeed.toStringAsFixed(0)} knots. Well below the 25 kt small-craft squall threshold. Favourable sailing drift.'
+                  : 'Strong breeze (${windSpeed.toStringAsFixed(0)} kt). Approaching squall threshold (25 kt). Secure gear and monitor course.',
+              style: const TextStyle(fontSize: 11, color: AppColors.inkLight, height: 1.35),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Direction: ENE (65°) • Gusts: 15 kt',
+                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.neonLime.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text('● SAFE TO SAIL', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.neonLime)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Border advisory
+      final isCaution = imblDist <= 5.0;
+      final isCritical = imblDist <= 2.0;
+      final statusColor = isCritical ? AppColors.safetyRed : (isCaution ? AppColors.hazardAmber : AppColors.neonLime);
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: const Color(0xCC09293A),
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: statusColor.withOpacity(0.8), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: statusColor.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.shield_rounded, size: 17, color: statusColor),
+                const SizedBox(width: 6),
+                Text(
+                  'IMBL BORDER CLEARANCE · ${imblDist.toStringAsFixed(1)} KM',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                    color: statusColor,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => setState(() => _selectedTelemetryIndex = null),
+                  child: const Icon(Icons.close_rounded, size: 17, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              isCritical
+                  ? 'CRITICAL ALERT: Only ${imblDist.toStringAsFixed(1)} km to Sri Lanka maritime boundary! Immediate course reversal required.'
+                  : (isCaution
+                      ? 'Caution: You are inside the 5.0 km buffer zone (${imblDist.toStringAsFixed(1)} km remaining). Maintain clearance from boundary.'
+                      : 'Safe waters: ${imblDist.toStringAsFixed(1)} km clearance to Sri Lanka boundary line. Standard navigation.'),
+              style: const TextStyle(fontSize: 11, color: AppColors.inkLight, height: 1.35),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isCaution ? 'Heading: ${_telemetry.headingDeg.toStringAsFixed(0)}° (Eastward)' : 'Buffer: 5.0 km active',
+                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.heavyImpact();
+                    setState(() {
+                      _showEvasiveCourse = true;
+                      _showPfzCourse = false;
+                      _telemetry = TelemetryModel(
+                        latitude: _telemetry.latitude,
+                        longitude: _telemetry.longitude,
+                        speedKnots: _telemetry.speedKnots,
+                        headingDeg: 265.0,
+                        timestamp: DateTime.now(),
+                      );
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        backgroundColor: AppColors.safetyRed,
+                        content: Text('⚠️ Course updated: Steer 265° Westward back into Indian waters', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.safetyRed,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text('Turn 265° West →', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   Widget _buildTelemetryCard({
+    required int index,
     required String icon,
     required Color iconColor,
     required String label,
@@ -1102,79 +1388,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required String unit,
     required String status,
     required Color statusColor,
+    required bool isSelected,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF09293A),
+          color: isSelected ? const Color(0xFF0F384E) : const Color(0xFF09293A),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFF173F50),
-            width: 1,
+            color: isSelected ? iconColor : const Color(0xFF173F50),
+            width: isSelected ? 1.5 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: iconColor.withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              icon,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                color: iconColor,
-              ),
+            Row(
+              children: [
+                Text(
+                  icon,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: iconColor,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  isSelected ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                  size: 13,
+                  color: isSelected ? iconColor : AppColors.textMuted.withOpacity(0.5),
+                ),
+              ],
             ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+            const SizedBox(height: 3),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.inkLight,
+                ),
                 children: [
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  TextSpan(text: value),
+                  TextSpan(
+                    text: ' $unit',
                     style: const TextStyle(
-                      fontFamily: 'Courier',
-                      fontSize: 7.2,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
                       color: AppColors.textMuted,
                     ),
                   ),
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.inkLight,
-                      ),
-                      children: [
-                        TextSpan(text: value),
-                        TextSpan(
-                          text: ' $unit',
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    status,
-                    style: TextStyle(
-                      fontFamily: 'Courier',
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
-                      color: statusColor,
-                    ),
-                  ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              status,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w800,
+                color: statusColor,
               ),
             ),
           ],

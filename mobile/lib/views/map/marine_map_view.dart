@@ -220,19 +220,19 @@ class _MarineMapViewState extends State<MarineMapView>
             backgroundColor: AppColors.brandNavy,
           ),
           children: [
-            // Dark Matter / CartoDB Tile Layer matching Web UI dark theme
+            // Dark Oceanic OpenStreetMap Tile Layer (No API Key Required, No Watermark)
             TileLayer(
-              urlTemplate: 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-              subdomains: const ['a', 'b', 'c', 'd'],
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               maxZoom: 18,
               userAgentPackageName: 'org.orca.mobile',
               tileBuilder: (context, tileWidget, tile) {
                 return ColorFiltered(
                   colorFilter: const ColorFilter.matrix([
-                    0.85, 0, 0, 0, 0,
-                    0, 0.95, 0, 0, 0,
-                    0, 0, 1.15, 0, 0,
-                    0, 0, 0, 1.0, 0,
+                    // Invert RGB and tint towards deep midnight oceanic blue
+                    -0.20,  0.00,  0.00, 0.0, 32,
+                     0.00, -0.18,  0.00, 0.0, 48,
+                     0.00,  0.00, -0.12, 0.0, 72,
+                     0.00,  0.00,  0.00, 1.0, 0,
                   ]),
                   child: tileWidget,
                 );
@@ -502,9 +502,9 @@ class _MarineMapViewState extends State<MarineMapView>
                         child: Text(
                           'RK',
                           style: TextStyle(
-                            fontFamily: 'Courier',
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
                             color: AppColors.inkLight,
                           ),
                         ),
@@ -578,11 +578,10 @@ class _MarineMapViewState extends State<MarineMapView>
                           const Text(
                             'GPS CONNECTED',
                             style: TextStyle(
-                              fontFamily: 'Courier',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
                               color: AppColors.inkLight,
-                              letterSpacing: 0.5,
+                              letterSpacing: 0.8,
                             ),
                           ),
                         ],
@@ -593,9 +592,10 @@ class _MarineMapViewState extends State<MarineMapView>
                         child: Text(
                           '${_formatCoordinate(widget.telemetry.latitude, true)}, ${_formatCoordinate(widget.telemetry.longitude, false)}',
                           style: TextStyle(
-                            fontFamily: 'Courier',
-                            fontSize: 8.5,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textMuted.withOpacity(0.9),
+                            letterSpacing: 0.2,
                           ),
                         ),
                       ),
@@ -729,10 +729,9 @@ class _MarineMapViewState extends State<MarineMapView>
                           const Text(
                             'ACTIVE ROUTE',
                             style: TextStyle(
-                              fontFamily: 'Courier',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.05,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.1,
                               color: AppColors.textMuted,
                             ),
                           ),

@@ -60,9 +60,9 @@ class ImblBoundaryLayer {
                   Text(
                     'IMBL · Maintain clearance',
                     style: TextStyle(
-                      fontFamily: 'Courier',
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
                       color: Color(0xFFFF9992),
                     ),
                   ),

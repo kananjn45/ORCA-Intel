@@ -95,9 +95,9 @@ class VesselHeadingMarker extends StatelessWidget {
             child: Text(
               'Your vessel · ${speedKnots.toStringAsFixed(1)} kt',
               style: const TextStyle(
-                fontFamily: 'Courier',
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
                 color: AppColors.inkLight,
               ),
             ),
