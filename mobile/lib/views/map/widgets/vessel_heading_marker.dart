@@ -21,9 +21,11 @@ class VesselHeadingMarker extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           // Rotating boat icon with glowing halo
           Stack(
             alignment: Alignment.center,
@@ -104,6 +106,7 @@ class VesselHeadingMarker extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

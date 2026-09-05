@@ -659,488 +659,861 @@ class _DashboardScreenState extends State<DashboardScreen> {
           body: Stack(
             children: [
               // ==================================================================
-              // UPPER PANEL: LIVE MARINE MAP (OR TACTICAL RADAR CANVAS)
+              // ACTIVE TAB CONTENT (FULL SCREEN)
               // ==================================================================
               Positioned.fill(
-                bottom: 240, // Leaves space for the bottom Command Deck
-                child: _activeNavIndex == 1
-                    // Radar Mode
-                    ? TacticalRadarCanvas(
-                        vesselHeadingDeg: _telemetry.headingDeg,
-                        speedKnots: _telemetry.speedKnots,
-                        imblDistanceKm: _geofence.distanceToImblKm,
-                        showPfzCourse: _showPfzCourse,
-                        showEvasiveCourse: _showEvasiveCourse,
-                        onPfzTap: _showPfzDetailsModal,
-                        onImblTap: _showBorderDetailsModal,
-                        onVesselTap: _showSimulationControls,
-                      )
-                    // Default: Live Web UI-Styled Marine Map
-                    : MarineMapView(
-                        telemetry: _telemetry,
-                        geofence: _geofence,
-                        showPfzRoute: _showPfzCourse,
-                        showEvasiveRoute: _showEvasiveCourse,
-                        isDarkMode: isDark,
-                        onThemeToggle: ThemeController.toggleTheme,
-                        onMenuTap: _showSimulationControls,
-                        onAvatarTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (ctx) => LanguageSelectorSheet(
-                              currentLanguageCode: _currentLanguageCode,
-                              onLanguageSelected: _handleLanguageChanged,
-                            ),
+                bottom: 60, // Slim clearance for bottom navigation bar
+                child: _buildActiveTabContent(isDark, waveHeight, windSpeed, imblDist),
+              ),
+
+              // ==================================================================
+              // EMERGENCY BANNER (Pops in if Warning / Critical / Lookahead Breach)
+              // ==================================================================
+              if (_geofence.warningLevel == GeofenceWarningLevel.critical ||
+                  _geofence.warningLevel == GeofenceWarningLevel.warning ||
+                  _geofence.lookaheadBreachProjected)
+                Positioned(
+                  top: 96,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    bottom: false,
+                    child: EmergencyBanner(
+                      geofence: _geofence,
+                      onEngageEvasive: () {
+                        HapticFeedback.heavyImpact();
+                        setState(() {
+                          _showEvasiveCourse = true;
+                          _showPfzCourse = false;
+                          _telemetry = TelemetryModel(
+                            latitude: _telemetry.latitude,
+                            longitude: _telemetry.longitude,
+                            speedKnots: _telemetry.speedKnots,
+                            headingDeg: _geofence.evasiveHeadingDeg ?? 265.0,
+                            timestamp: DateTime.now(),
                           );
-                        },
-                        onPfzTap: _showPfzDetailsModal,
-                        onImblTap: _showBorderDetailsModal,
-                        onHazardsTap: _showWeatherDetailsModal,
-                        onRouteChipTap: _showPfzDetailsModal,
-                      ),
-              ),
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: AppColors.safetyRed,
+                            content: Text(
+                              '🚨 Evasive 180° course engaged (Heading ${_geofence.evasiveHeadingDeg?.toStringAsFixed(0) ?? "265"}° W back into Indian waters)',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                          ),
+                        );
+                      },
+                      onDismiss: () {
+                        setState(() {
+                          _geofence = GeofenceModel(
+                            distanceToImblKm: _geofence.distanceToImblKm,
+                            nearestImblPoint: _geofence.nearestImblPoint,
+                            lookaheadBreachProjected: false,
+                            warningLevel: GeofenceWarningLevel.safe,
+                            evasiveHeadingDeg: _geofence.evasiveHeadingDeg,
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ),
 
-          // ==================================================================
-          // EMERGENCY BANNER (Pops in if Warning / Critical / Lookahead Breach)
-          // ==================================================================
-          if (_geofence.warningLevel == GeofenceWarningLevel.critical ||
-              _geofence.warningLevel == GeofenceWarningLevel.warning ||
-              _geofence.lookaheadBreachProjected)
-            Positioned(
-              top: 104,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                bottom: false,
-                child: EmergencyBanner(
-                  geofence: _geofence,
-                  onEngageEvasive: () {
-                    HapticFeedback.heavyImpact();
-                    setState(() {
-                      _showEvasiveCourse = true;
-                      _showPfzCourse = false;
-                      _telemetry = TelemetryModel(
-                        latitude: _telemetry.latitude,
-                        longitude: _telemetry.longitude,
-                        speedKnots: _telemetry.speedKnots,
-                        headingDeg: _geofence.evasiveHeadingDeg ?? 265.0,
-                        timestamp: DateTime.now(),
-                      );
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: AppColors.safetyRed,
-                        content: Text(
-                          '🚨 Evasive 180° course engaged (Heading ${_geofence.evasiveHeadingDeg?.toStringAsFixed(0) ?? "265"}° W back into Indian waters)',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                      ),
-                    );
-                  },
-                  onDismiss: () {
-                    setState(() {
-                      _geofence = GeofenceModel(
-                        distanceToImblKm: _geofence.distanceToImblKm,
-                        nearestImblPoint: _geofence.nearestImblPoint,
-                        lookaheadBreachProjected: false,
-                        warningLevel: GeofenceWarningLevel.safe,
-                        evasiveHeadingDeg: _geofence.evasiveHeadingDeg,
-                      );
-                    });
-                  },
-                ),
+              // ==================================================================
+              // FLOATING BOTTOM NAVIGATION BAR (Clean, Tactile, 5 Tabs)
+              // ==================================================================
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildBottomNavBar(isDark),
               ),
-            ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
-          // ==================================================================
-          // LOWER PANEL: WEB UI COMMAND DECK (Frosted Glass Tactical Sheet)
-          // ==================================================================
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDark
-                      ? const [
-                          Color(0xFF062033),
-                          Color(0xFF061B2B),
-                        ]
-                      : const [
-                          Color(0xFFFFFFFF),
-                          Color(0xFFF8FAFC),
-                        ],
-                ),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                border: Border.all(
-                  color: isDark ? AppColors.cardBorder.withOpacity(0.35) : const Color(0xFFCBD5E1),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.55 : 0.08),
-                    blurRadius: 24,
-                    offset: const Offset(0, -6),
+  Widget _buildActiveTabContent(bool isDark, double waveHeight, double windSpeed, double imblDist) {
+    switch (_activeNavIndex) {
+      case 1:
+        return _buildSafetyTab(isDark, waveHeight, windSpeed, imblDist);
+      case 2:
+        return _buildVoiceAITab(isDark);
+      case 3:
+        return _buildRadarTab(isDark);
+      case 4:
+        return _buildOfflineTab(isDark);
+      case 0:
+      default:
+        return _buildMapTab(isDark);
+    }
+  }
+
+  /// TAB 0: 100% Fullscreen Marine Map Canvas
+  Widget _buildMapTab(bool isDark) {
+    return MarineMapView(
+      telemetry: _telemetry,
+      geofence: _geofence,
+      showPfzRoute: _showPfzCourse,
+      showEvasiveRoute: _showEvasiveCourse,
+      isDarkMode: isDark,
+      currentLanguageName: _currentLanguageName,
+      onThemeToggle: ThemeController.toggleTheme,
+      onMenuTap: _showSimulationControls,
+      onAvatarTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) => LanguageSelectorSheet(
+            currentLanguageCode: _currentLanguageCode,
+            onLanguageSelected: _handleLanguageChanged,
+          ),
+        );
+      },
+      onPfzTap: _showPfzDetailsModal,
+      onImblTap: _showBorderDetailsModal,
+      onHazardsTap: _showWeatherDetailsModal,
+      onRouteChipTap: _showPfzDetailsModal,
+    );
+  }
+
+  /// TAB 1: Dedicated Safety & Telemetry Screen
+  Widget _buildSafetyTab(bool isDark, double waveHeight, double windSpeed, double imblDist) {
+    final isCaution = _geofence.warningLevel == GeofenceWarningLevel.warning || waveHeight >= 2.0;
+    final isCritical = _geofence.warningLevel == GeofenceWarningLevel.critical || imblDist <= 2.0;
+
+    final statusTitle = isCritical
+        ? 'CRITICAL ALERT: TURN BACK'
+        : (isCaution ? 'CAUTION: ROUGH SEAS / BORDER APPROACH' : 'CONDITIONS FAVOURABLE · SAFE');
+    final statusTitleTa = isCritical
+        ? 'ஆபத்து! உடனடியாக திரும்பவும்'
+        : (isCaution ? 'எச்சரிக்கை: கடல் எல்லை அருகில்' : 'பாதுகாப்பானது · கடலுக்கு செல்லலாம்');
+    final statusColor = isCritical
+        ? AppColors.safetyRed
+        : (isCaution ? AppColors.hazardAmber : (isDark ? AppColors.neonLime : const Color(0xFF16A34A)));
+
+    return SafeArea(
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+        children: [
+          // Header Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SAFETY & TELEMETRY',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.3,
+                      color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
+                    ),
+                  ),
+                  Text(
+                    'Tamil Nadu Coast · Live INCOIS Satellite Feed',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+                    ),
                   ),
                 ],
               ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 10, 18, 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Deck Handle
-                      Container(
-                        width: 38,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.brandHandle : const Color(0xFFCBD5E1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
+                  side: BorderSide(
+                    color: (isDark ? AppColors.neonLime : const Color(0xFF0284C7)).withOpacity(0.5),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.science_rounded, size: 16),
+                label: const Text('Simulator', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                onPressed: _showSimulationControls,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
 
-                      // Greeting Row
-                      Row(
+          // Master Status Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF09293A) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: statusColor.withOpacity(0.7), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: statusColor.withOpacity(isDark ? 0.15 : 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isCritical
+                            ? Icons.warning_rounded
+                            : (isCaution ? Icons.warning_amber_rounded : Icons.check_circle_rounded),
+                        color: statusColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'GOOD MORNING, CAPTAIN',
-                                  style: TextStyle(
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.1,
-                                    color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                RichText(
-                                  text: TextSpan(
-                                    style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.6,
-                                      color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
-                                    ),
-                                    children: [
-                                      const TextSpan(text: 'Conditions are '),
-                                      TextSpan(
-                                        text: waveHeight < 2.0 ? 'favourable.' : 'hazardous!',
-                                        style: TextStyle(
-                                          color: waveHeight < 2.0
-                                              ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
-                                              : AppColors.hazardAmber,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            statusTitle,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.3,
+                              color: statusColor,
                             ),
                           ),
-                          // Safety › Button (toggles quick safety overview)
-                          GestureDetector(
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              setState(() {
-                                _selectedTelemetryIndex =
-                                    _selectedTelemetryIndex == null ? 0 : null;
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF173A47) : const Color(0xFFE2E8F0),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: isDark ? const Color(0xFF2C5963) : const Color(0xFFCBD5E1),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Safety',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: isDark ? const Color(0xFFBDE1DF) : const Color(0xFF0F172A),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _selectedTelemetryIndex != null ? '▾' : '›',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w900,
-                                      color: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          Text(
+                            statusTitleTa,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.textMuted : const Color(0xFF475569),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-
-                      // 3-Column Interactive Telemetry Safety Bar
-                      Row(
-                        children: [
-                          // 1. Wave Height
-                          Expanded(
-                            child: _buildTelemetryCard(
-                              index: 0,
-                              icon: '≈',
-                              iconColor: isDark ? AppColors.electricCyan : const Color(0xFF0284C7),
-                              label: 'WAVE',
-                              value: waveHeight.toStringAsFixed(1),
-                              unit: 'm',
-                              status: waveHeight < 1.5 ? '● CALM' : '● SWELL',
-                              statusColor: waveHeight < 1.5
-                                  ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
-                                  : AppColors.hazardAmber,
-                              isSelected: _selectedTelemetryIndex == 0,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                setState(() {
-                                  _selectedTelemetryIndex =
-                                      _selectedTelemetryIndex == 0 ? null : 0;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 7),
-                          // 2. Wind Speed
-                          Expanded(
-                            child: _buildTelemetryCard(
-                              index: 1,
-                              icon: '↗',
-                              iconColor: isDark ? AppColors.neonLime : const Color(0xFF16A34A),
-                              label: 'WIND',
-                              value: windSpeed.toStringAsFixed(0),
-                              unit: 'kt',
-                              status: 'NE · STEADY',
-                              statusColor: isDark ? AppColors.textMuted : const Color(0xFF64748B),
-                              isSelected: _selectedTelemetryIndex == 1,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                setState(() {
-                                  _selectedTelemetryIndex =
-                                      _selectedTelemetryIndex == 1 ? null : 1;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 7),
-                          // 3. Nearest Border
-                          Expanded(
-                            child: _buildTelemetryCard(
-                              index: 2,
-                              icon: '⌁',
-                              iconColor: isDark ? AppColors.electricTeal : const Color(0xFF0D9488),
-                              label: 'BORDER',
-                              value: imblDist.toStringAsFixed(1),
-                              unit: 'km',
-                              status: imblDist > 5.0 ? '● SAFE' : '⚠️ CAUTION',
-                              statusColor: imblDist > 5.0
-                                  ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
-                                  : AppColors.safetyRed,
-                              isSelected: _selectedTelemetryIndex == 2,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                setState(() {
-                                  _selectedTelemetryIndex =
-                                      _selectedTelemetryIndex == 2 ? null : 2;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF051D2A) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text(
+                        'GPS: ${_telemetry.latitude.toStringAsFixed(2)}°N, ${_telemetry.longitude.toStringAsFixed(2)}°E',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: isDark ? AppColors.inkLight : const Color(0xFF334155)),
                       ),
-
-                      // INLINE INTERACTIVE ADVISORY (Appears instantly when tapping any of the 3 options)
-                      if (_selectedTelemetryIndex != null) ...[
-                        const SizedBox(height: 10),
-                        _buildInlineAdvisoryCard(waveHeight, windSpeed, imblDist),
-                      ],
-                      const SizedBox(height: 12),
-
-                      // Action Row (Primary CTA + Voice Mic Action)
-                      Row(
-                        children: [
-                          // Primary Navigation Action Button
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                HapticFeedback.heavyImpact();
-                                setState(() {
-                                  _showPfzCourse = !_showPfzCourse;
-                                });
-                                _showPfzDetailsModal();
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
-                                  borderRadius: BorderRadius.circular(13),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: (isDark ? AppColors.neonLime : const Color(0xFF0284C7)).withOpacity(0.3),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.explore_rounded,
-                                      color: isDark ? const Color(0xFF092238) : Colors.white,
-                                      size: 24,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'NAVIGATION',
-                                          style: TextStyle(
-                                            fontSize: 8.5,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 1.0,
-                                            color: isDark ? const Color(0x99092238) : Colors.white70,
-                                          ),
-                                        ),
-                                        Text(
-                                          'Start safe route',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w800,
-                                            color: isDark ? const Color(0xFF092238) : Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const Spacer(),
-                                    Icon(
-                                      Icons.arrow_forward_rounded,
-                                      color: isDark ? const Color(0xFF092238) : Colors.white,
-                                      size: 20,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          // Voice Mic Action Button
-                          GestureDetector(
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              _openConversationalDrawer();
-                            },
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF123949) : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(13),
-                                border: Border.all(
-                                  color: isDark ? const Color(0xFF286070) : const Color(0xFFCBD5E1),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '⌁',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w900,
-                                    color: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Speed: ${_telemetry.speedKnots.toStringAsFixed(1)} kt',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: isDark ? AppColors.inkLight : const Color(0xFF334155)),
                       ),
-                      const SizedBox(height: 10),
-
-                      // Bottom Navigation Bar
-                      Container(
-                        padding: const EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: isDark ? const Color(0xFF183747) : const Color(0xFFE2E8F0),
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildNavItem(
-                              index: 0,
-                              icon: '◉',
-                              label: 'Voyage',
-                              isActive: _activeNavIndex == 0,
-                            ),
-                            _buildNavItem(
-                              index: 1,
-                              icon: '◈',
-                              label: 'Radar',
-                              isActive: _activeNavIndex == 1,
-                            ),
-                            _buildNavItem(
-                              index: 2,
-                              icon: '◷',
-                              label: 'Alerts',
-                              isActive: _activeNavIndex == 2,
-                              badge: '2',
-                            ),
-                            _buildNavItem(
-                              index: 3,
-                              icon: '◌',
-                              label: 'Offline',
-                              isActive: _activeNavIndex == 3,
-                            ),
-                          ],
-                        ),
+                      Text(
+                        'Heading: ${_telemetry.headingDeg.toStringAsFixed(0)}°',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: isDark ? AppColors.inkLight : const Color(0xFF334155)),
                       ),
                     ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 3 Large Tactile Cards Header
+          Text(
+            'TAP METRIC FOR DETAILED ADVISORY',
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // 3 Tactile Cards
+          Row(
+            children: [
+              Expanded(
+                child: _buildTelemetryCard(
+                  index: 0,
+                  icon: '≈',
+                  iconColor: isDark ? AppColors.electricCyan : const Color(0xFF0284C7),
+                  label: 'WAVE',
+                  value: waveHeight.toStringAsFixed(1),
+                  unit: 'm',
+                  status: waveHeight < 1.5 ? '● CALM' : '● SWELL',
+                  statusColor: waveHeight < 1.5
+                      ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
+                      : AppColors.hazardAmber,
+                  isSelected: _selectedTelemetryIndex == 0,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() {
+                      _selectedTelemetryIndex = _selectedTelemetryIndex == 0 ? null : 0;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildTelemetryCard(
+                  index: 1,
+                  icon: '↗',
+                  iconColor: isDark ? AppColors.neonLime : const Color(0xFF16A34A),
+                  label: 'WIND',
+                  value: windSpeed.toStringAsFixed(0),
+                  unit: 'kt',
+                  status: 'NE · STEADY',
+                  statusColor: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+                  isSelected: _selectedTelemetryIndex == 1,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() {
+                      _selectedTelemetryIndex = _selectedTelemetryIndex == 1 ? null : 1;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildTelemetryCard(
+                  index: 2,
+                  icon: '⌁',
+                  iconColor: isDark ? AppColors.electricTeal : const Color(0xFF0D9488),
+                  label: 'BORDER',
+                  value: imblDist.toStringAsFixed(1),
+                  unit: 'km',
+                  status: imblDist > 5.0 ? '● SAFE' : '⚠️ CAUTION',
+                  statusColor: imblDist > 5.0
+                      ? (isDark ? AppColors.neonLime : const Color(0xFF16A34A))
+                      : AppColors.safetyRed,
+                  isSelected: _selectedTelemetryIndex == 2,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() {
+                      _selectedTelemetryIndex = _selectedTelemetryIndex == 2 ? null : 2;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Inline Interactive Advisory
+          _buildInlineAdvisoryCard(waveHeight, windSpeed, imblDist),
+          const SizedBox(height: 16),
+
+          // Quick Navigation Actions
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
+                    foregroundColor: isDark ? const Color(0xFF092238) : Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.explore_rounded, size: 20),
+                  label: Text(
+                    _showPfzCourse ? 'Inspect Active Route' : 'Plot Safe Route to PFZ',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  ),
+                  onPressed: () {
+                    HapticFeedback.heavyImpact();
+                    setState(() => _showPfzCourse = true);
+                    _showPfzDetailsModal();
+                  },
+                ),
+              ),
+              if (imblDist <= 5.0) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.safetyRed,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: const Icon(Icons.turn_left_rounded, size: 20),
+                    label: const Text(
+                      'Plot Evasive 265° W',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
+                    onPressed: () {
+                      HapticFeedback.heavyImpact();
+                      setState(() {
+                        _showEvasiveCourse = true;
+                        _showPfzCourse = false;
+                        _telemetry = TelemetryModel(
+                          latitude: _telemetry.latitude,
+                          longitude: _telemetry.longitude,
+                          speedKnots: _telemetry.speedKnots,
+                          headingDeg: 265.0,
+                          timestamp: DateTime.now(),
+                        );
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: AppColors.safetyRed,
+                          content: Text('⚠️ Evasive course plotted: Steer 265° Westward away from IMBL boundary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// TAB 2: Dedicated Voice AI Assistant Screen
+  Widget _buildVoiceAITab(bool isDark) {
+    final loc = AppLocalizations.of(_currentLanguageCode);
+    final quickPrompts = List<String>.from(loc['quickPrompts'] as List? ?? ['Wave Swell', 'Border Distance', 'PFZ Route', 'Harbor Return']);
+    final advisoryTa = _latestAdvisory?.textLocalized ??
+        (loc['weatherStatus'] as String? ?? 'கடல் அமைதியாக உள்ளது (அலை: 0.8மீ, காற்று: 12 நாட்ஸ்). பாதுகாப்பான மண்டலம்.');
+    final advisoryEn = _latestAdvisory?.textEnglish ??
+        (loc['weatherStatusEn'] as String? ?? 'Sea conditions calm (Wave: 0.8m, Wind: 12 kts). Safe fishing zone.');
+
+    return SafeArea(
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+        children: [
+          // Top Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'VOICE AI ADVISORY',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.3,
+                      color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
+                    ),
+                  ),
+                  Text(
+                    'Bhashini Multilingual Speech Assistant',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (ctx) => LanguageSelectorSheet(
+                      currentLanguageCode: _currentLanguageCode,
+                      onLanguageSelected: _handleLanguageChanged,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F3244) : const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF265C70) : const Color(0xFFCBD5E1),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🌐', style: TextStyle(fontSize: 13)),
+                      const SizedBox(width: 4),
+                      Text(
+                        _currentLanguageName,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(Icons.arrow_drop_down, size: 16, color: isDark ? AppColors.textMuted : const Color(0xFF64748B)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // AI Advisory Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF09293A) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark ? const Color(0xFF1E5266) : const Color(0xFFCBD5E1),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.neonLime : const Color(0xFF16A34A),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'ORCA INTELLIGENCE AGENT',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: isDark ? AppColors.neonLime : const Color(0xFF0284C7),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      'LIVE FEED',
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.textMuted : const Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  advisoryTa,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    height: 1.4,
+                    color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  advisoryEn,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                    color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Oversized Hold-To-Speak Mic Button
+          Center(
+            child: GestureDetector(
+              onLongPressStart: (_) => _handleVoiceRecordingStart(),
+              onLongPressEnd: (_) => _handleVoiceRecordingEnd(),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: _isRecording ? 104 : 92,
+                height: _isRecording ? 104 : 92,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: _isRecording
+                        ? [AppColors.safetyRed, const Color(0xFFB91C1C)]
+                        : (isDark
+                            ? [AppColors.neonLime, const Color(0xFF00B058)]
+                            : [const Color(0xFF0284C7), const Color(0xFF0369A1)]),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (_isRecording
+                              ? AppColors.safetyRed
+                              : (isDark ? AppColors.neonLime : const Color(0xFF0284C7)))
+                          .withOpacity(0.4),
+                      blurRadius: _isRecording ? 28 : 16,
+                      spreadRadius: _isRecording ? 4 : 0,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    _isRecording ? Icons.mic_rounded : Icons.mic_none_rounded,
+                    size: 42,
+                    color: _isRecording ? Colors.white : (isDark ? const Color(0xFF041926) : Colors.white),
                   ),
                 ),
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          Center(
+            child: Text(
+              _isRecording ? '● LISTENING... / கேட்கிறது...' : 'HOLD TO SPEAK / பேச அழுத்திப் பிடிக்கவும்',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.6,
+                color: _isRecording
+                    ? AppColors.safetyRed
+                    : (isDark ? AppColors.neonLime : const Color(0xFF0284C7)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 22),
+
+          // Quick Inquiries Chips Header
+          Text(
+            'QUICK VOICE INQUIRIES / உடனடி கேள்விகள்',
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: quickPrompts.map((prompt) {
+              return ActionChip(
+                backgroundColor: isDark ? const Color(0xFF0C2D3E) : const Color(0xFFE2E8F0),
+                side: BorderSide(
+                  color: isDark ? const Color(0xFF1A5066) : const Color(0xFFCBD5E1),
+                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                label: Text(
+                  prompt,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.inkLight : const Color(0xFF0F172A),
+                  ),
+                ),
+                onPressed: () => _handleQuickPrompt(prompt),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
-      },
+  }
+
+  /// TAB 3: Tactical Marine Radar Canvas
+  Widget _buildRadarTab(bool isDark) {
+    return SafeArea(
+      bottom: false,
+      child: TacticalRadarCanvas(
+        vesselHeadingDeg: _telemetry.headingDeg,
+        speedKnots: _telemetry.speedKnots,
+        imblDistanceKm: _geofence.distanceToImblKm,
+        showPfzCourse: _showPfzCourse,
+        showEvasiveCourse: _showEvasiveCourse,
+        onPfzTap: _showPfzDetailsModal,
+        onImblTap: _showBorderDetailsModal,
+        onVesselTap: _showSimulationControls,
+      ),
+    );
+  }
+
+  /// TAB 4: Pre-Voyage High Seas Offline Sync Screen
+  Widget _buildOfflineTab(bool isDark) {
+    return PreVoyageScreen(
+      onBack: () => setState(() => _activeNavIndex = 0),
+    );
+  }
+
+  /// Floating Frosted Glass Bottom Navigation Bar (5 Tabs)
+  Widget _buildBottomNavBar(bool isDark) {
+    final navBg = isDark ? const Color(0xE6051A29) : const Color(0xF2FFFFFF);
+    final borderColor = isDark ? const Color(0x3338BDF8) : const Color(0xFFE2E8F0);
+
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          decoration: BoxDecoration(
+            color: navBg,
+            border: Border(
+              top: BorderSide(color: borderColor, width: 1.2),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.45 : 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 60,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavBarItem(
+                    index: 0,
+                    icon: Icons.map_rounded,
+                    label: 'Map',
+                    isActive: _activeNavIndex == 0,
+                    isDark: isDark,
+                  ),
+                  _buildNavBarItem(
+                    index: 1,
+                    icon: Icons.shield_rounded,
+                    label: 'Safety',
+                    isActive: _activeNavIndex == 1,
+                    isDark: isDark,
+                    hasAlert: _geofence.warningLevel == GeofenceWarningLevel.critical ||
+                        _geofence.warningLevel == GeofenceWarningLevel.warning,
+                  ),
+                  _buildNavBarItem(
+                    index: 2,
+                    icon: Icons.mic_rounded,
+                    label: 'Voice AI',
+                    isActive: _activeNavIndex == 2,
+                    isDark: isDark,
+                  ),
+                  _buildNavBarItem(
+                    index: 3,
+                    icon: Icons.radar_rounded,
+                    label: 'Radar',
+                    isActive: _activeNavIndex == 3,
+                    isDark: isDark,
+                  ),
+                  _buildNavBarItem(
+                    index: 4,
+                    icon: Icons.cloud_download_rounded,
+                    label: 'Offline',
+                    isActive: _activeNavIndex == 4,
+                    isDark: isDark,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavBarItem({
+    required int index,
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required bool isDark,
+    bool hasAlert = false,
+  }) {
+    final activeColor = isDark ? AppColors.neonLime : const Color(0xFF0284C7);
+    final inactiveColor = isDark ? const Color(0xFF7897A3) : const Color(0xFF64748B);
+    final activePillBg = isDark ? const Color(0x2E00FF88) : const Color(0x1F0284C7);
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          setState(() => _activeNavIndex = index);
+        },
+        child: Center(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isActive ? activePillBg : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 22,
+                      color: isActive ? activeColor : inactiveColor,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                        color: isActive ? activeColor : inactiveColor,
+                      ),
+                    ),
+                  ],
+                ),
+                if (hasAlert)
+                  Positioned(
+                    top: -2,
+                    right: -4,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.safetyRed,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1518,83 +1891,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem({
-    required int index,
-    required String icon,
-    required String label,
-    required bool isActive,
-    String? badge,
-  }) {
-    final isDark = ThemeController.isDarkMode.value;
-    final activeColor = isDark ? AppColors.neonLime : const Color(0xFF0284C7);
-    final inactiveColor = isDark ? const Color(0xFF71969E) : const Color(0xFF64748B);
-
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        if (index == 2) {
-          // Alerts modal
-          _showBorderDetailsModal();
-        } else if (index == 3) {
-          // Offline Screen
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const PreVoyageScreen()),
-          );
-        } else {
-          setState(() => _activeNavIndex = index);
-        }
-      },
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                icon,
-                style: TextStyle(
-                  fontSize: 17,
-                  color: isActive ? activeColor : inactiveColor,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 9.5,
-                  fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                  color: isActive ? activeColor : inactiveColor,
-                ),
-              ),
-            ],
-          ),
-          if (badge != null)
-            Positioned(
-              top: -4,
-              right: -8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: AppColors.safetyRed,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  badge,
-                  style: const TextStyle(
-                    fontFamily: 'Courier',
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }

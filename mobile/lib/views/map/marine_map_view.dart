@@ -19,6 +19,7 @@ class MarineMapView extends StatefulWidget {
   final bool showPfzRoute;
   final bool showEvasiveRoute;
   final bool isDarkMode;
+  final String currentLanguageName;
   final VoidCallback? onThemeToggle;
   final VoidCallback? onRecenterTap;
   final VoidCallback? onMenuTap;
@@ -35,6 +36,7 @@ class MarineMapView extends StatefulWidget {
     this.showPfzRoute = true,
     this.showEvasiveRoute = false,
     this.isDarkMode = true,
+    this.currentLanguageName = 'English',
     this.onThemeToggle,
     this.onRecenterTap,
     this.onMenuTap,
@@ -357,7 +359,7 @@ class _MarineMapViewState extends State<MarineMapView>
               markers: [
                 Marker(
                   point: vesselPos,
-                  width: 90,
+                  width: 110,
                   height: 90,
                   child: VesselHeadingMarker(
                     headingDeg: widget.telemetry.headingDeg,
@@ -532,15 +534,14 @@ class _MarineMapViewState extends State<MarineMapView>
                       ),
                       const SizedBox(width: 8),
 
-                      // Profile / Language Avatar
+                      // Direct Language Pill Button (replaces generic avatar)
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           widget.onAvatarTap?.call();
                         },
                         child: Container(
-                          width: 42,
-                          height: 42,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                           decoration: BoxDecoration(
                             color: widget.isDarkMode ? const Color(0xD9041926) : Colors.white.withOpacity(0.92),
                             borderRadius: BorderRadius.circular(14),
@@ -556,16 +557,21 @@ class _MarineMapViewState extends State<MarineMapView>
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: Text(
-                              'RK',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                                color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('🌐', style: TextStyle(fontSize: 12)),
+                              const SizedBox(width: 4),
+                              Text(
+                                widget.currentLanguageName,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.3,
+                                  color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -674,7 +680,7 @@ class _MarineMapViewState extends State<MarineMapView>
         // ====================================================================
         Positioned(
           right: 18,
-          bottom: 84,
+          bottom: 130,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(14),
             child: BackdropFilter(
@@ -715,12 +721,12 @@ class _MarineMapViewState extends State<MarineMapView>
         ),
 
         // ====================================================================
-        // 6. ACTIVE ROUTE CHIP (FLOATING ABOVE COMMAND DECK)
+        // 6. ACTIVE ROUTE CHIP (FLOATING ABOVE BOTTOM BAR)
         // ====================================================================
         Positioned(
           left: 18,
           right: 18,
-          bottom: 18,
+          bottom: 70,
           child: GestureDetector(
             onTap: () {
               HapticFeedback.selectionClick();

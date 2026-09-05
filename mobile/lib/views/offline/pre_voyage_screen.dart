@@ -5,7 +5,8 @@ import '../../data/repositories/marine_repository.dart';
 import 'widgets/pack_download_progress.dart';
 
 class PreVoyageScreen extends StatefulWidget {
-  const PreVoyageScreen({super.key});
+  final VoidCallback? onBack;
+  const PreVoyageScreen({super.key, this.onBack});
 
   @override
   State<PreVoyageScreen> createState() => _PreVoyageScreenState();
@@ -146,7 +147,13 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
         title: const Text('Pre-Voyage Offline Sync'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.radarCyan),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (widget.onBack != null) {
+              widget.onBack!();
+            } else if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+          },
         ),
       ),
       body: SafeArea(
