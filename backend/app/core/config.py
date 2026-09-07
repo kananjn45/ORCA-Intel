@@ -114,7 +114,8 @@ class Settings(BaseSettings):
     @property
     def is_google_configured(self) -> bool:
         """Return True if a valid Google Cloud API key is available."""
-        return bool(self.google_api_key)
+        key = self.google_api_key
+        return bool(key and not key.lower().startswith(("placeholder", "your_")))
 
     @property
     def use_google_mock(self) -> bool:
@@ -124,9 +125,9 @@ class Settings(BaseSettings):
     @property
     def bhashini_configured(self) -> bool:
         """Return True if real Bhashini credentials are available."""
-        key = self.bhashini_api_key or self.BHASHINI_API_KEY
-        uid = self.bhashini_user_id or self.BHASHINI_USER_ID
-        return bool(key and uid)
+        key = (self.bhashini_api_key or self.BHASHINI_API_KEY).strip()
+        uid = (self.bhashini_user_id or self.BHASHINI_USER_ID).strip()
+        return bool(key and uid and not key.lower().startswith(("placeholder", "your_")))
 
     @property
     def use_bhashini_mock(self) -> bool:
