@@ -35,7 +35,7 @@ class AstarRouteLayer {
       markers: [
         Marker(
           point: destination,
-          width: 110,
+          width: 140,
           height: 60,
           child: GestureDetector(
             onTap: onTap,
@@ -60,13 +60,16 @@ class AstarRouteLayer {
                       ),
                     ],
                   ),
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.neonLime,
-                      letterSpacing: 0.3,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.neonLime,
+                        letterSpacing: 0.3,
+                      ),
                     ),
                   ),
                 ),

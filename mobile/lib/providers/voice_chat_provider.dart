@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
 import '../core/utils/audio_player_helper.dart';
@@ -52,13 +55,26 @@ class VoiceChatProvider extends ChangeNotifier {
     try {
       _lastError = null;
       if (await _audioRecorder.hasPermission()) {
+        String recordPath = '';
+        if (!kIsWeb) {
+          try {
+            final tempDir = await getTemporaryDirectory();
+            recordPath = p.join(
+              tempDir.path,
+              'orca_voice_${DateTime.now().millisecondsSinceEpoch}.wav',
+            );
+          } catch (_) {
+            recordPath = '';
+          }
+        }
+
         await _audioRecorder.start(
           const RecordConfig(
             encoder: AudioEncoder.wav,
             sampleRate: 16000,
             numChannels: 1,
           ),
-          path: '',
+          path: recordPath,
         );
         _isRecording = true;
         notifyListeners();
@@ -90,8 +106,15 @@ class VoiceChatProvider extends ChangeNotifier {
       Uint8List? audioBytes;
 
       if (path != null && path.isNotEmpty) {
-        // Read bytes if file path was returned
-        // On web / in-memory, bytes may be available via record stream
+        if (!kIsWeb) {
+          final file = File(path);
+          if (await file.exists()) {
+            audioBytes = await file.readAsBytes();
+            try {
+              await file.delete();
+            } catch (_) {}
+          }
+        }
       }
 
       // Transcribe via Dev 4 Bhashini ASR

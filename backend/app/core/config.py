@@ -1,5 +1,4 @@
-from typing import List, Union
-from pydantic import AnyHttpUrl, validator
+from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -28,7 +27,20 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3:8b"
 
-    # Bhashini Multilingual Speech API
+    # Google Cloud Translation & Speech APIs (Dev 4)
+    GOOGLE_CLOUD_API_KEY: str = ""
+    GOOGLE_TRANSLATE_API_KEY: str = ""
+    GOOGLE_SPEECH_API_KEY: str = ""
+    GOOGLE_API_KEY: str = ""
+    GOOGLE_TRANSLATE_ENDPOINT: str = "https://translation.googleapis.com/language/translate/v2"
+    GOOGLE_SPEECH_ENDPOINT: str = "https://speech.googleapis.com/v1/speech:recognize"
+    GOOGLE_TTS_ENDPOINT: str = "https://texttospeech.googleapis.com/v1/text:synthesize"
+    TRANSLATION_PROVIDER: str = "google"  # 'google' | 'bhashini' | 'mock'
+    VOICE_PROVIDER: str = "google"        # 'google' | 'bhashini' | 'mock'
+    google_timeout_seconds: float = 15.0
+    google_mock_mode: bool = False
+
+    # Bhashini Multilingual Speech API (Fallback)
     BHASHINI_USER_ID: str = ""
     BHASHINI_API_KEY: str = ""
     BHASHINI_PIPELINE_ENDPOINT: str = "https://dhruva-api.bhashini.gov.in/services/inference/pipeline"
@@ -87,6 +99,27 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @property
+    def google_api_key(self) -> str:
+        """Resolve Google Cloud API key in priority order."""
+        return (
+            self.GOOGLE_TRANSLATE_API_KEY
+            or self.GOOGLE_SPEECH_API_KEY
+            or self.GOOGLE_CLOUD_API_KEY
+            or self.GOOGLE_API_KEY
+            or self.GEMINI_API_KEY
+        ).strip()
+
+    @property
+    def is_google_configured(self) -> bool:
+        """Return True if a valid Google Cloud API key is available."""
+        return bool(self.google_api_key)
+
+    @property
+    def use_google_mock(self) -> bool:
+        """Return True when Google Cloud mock/fallback mode should be used."""
+        return self.google_mock_mode or not self.is_google_configured
 
     @property
     def bhashini_configured(self) -> bool:

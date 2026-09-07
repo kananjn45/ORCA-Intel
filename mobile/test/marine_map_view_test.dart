@@ -142,7 +142,7 @@ void main() {
 
       // Verify Tab 0 (Map) is active by default: shows language pill and theme toggle
       expect(find.text('English'), findsOneWidget);
-      expect(find.text('🌙'), findsOneWidget);
+      expect(find.byIcon(Icons.wb_sunny_rounded), findsOneWidget);
 
       // Tap Tab 1: Safety & Telemetry
       await tester.tap(find.text('Safety'));
@@ -165,7 +165,12 @@ void main() {
       await tester.pump();
 
       expect(find.text('SAFETY & TELEMETRY'), findsNothing);
-      expect(find.text('🌙'), findsOneWidget);
+      expect(find.byIcon(Icons.wb_sunny_rounded), findsOneWidget);
+
+      // Cleanly unmount to dispose repeating pulse animations
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 35));
     });
   });
 }

@@ -275,8 +275,8 @@ class _MarineMapViewState extends State<MarineMapView>
                 markers: [
                   Marker(
                     point: hazardCenter,
-                    width: 130,
-                    height: 38,
+                    width: 190,
+                    height: 44,
                     child: GestureDetector(
                       onTap: widget.onHazardsTap,
                       child: Container(
@@ -295,38 +295,42 @@ class _MarineMapViewState extends State<MarineMapView>
                             ),
                           ],
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.waves_rounded,
-                              size: 13,
-                              color: AppColors.hazardAmber,
-                            ),
-                            SizedBox(width: 4),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'WEATHER WATCH',
-                                  style: TextStyle(
-                                    fontSize: 8.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.hazardAmber,
-                                    letterSpacing: 0.3,
+                        child: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.waves_rounded,
+                                size: 13,
+                                color: AppColors.hazardAmber,
+                              ),
+                              SizedBox(width: 4),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'WEATHER WATCH',
+                                    style: TextStyle(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.hazardAmber,
+                                      letterSpacing: 0.3,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  'Moderate swell window',
-                                  style: TextStyle(
-                                    fontSize: 7.5,
-                                    color: AppColors.inkLight,
+                                  Text(
+                                    'Moderate swell window',
+                                    style: TextStyle(
+                                      fontSize: 7.5,
+                                      color: AppColors.inkLight,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

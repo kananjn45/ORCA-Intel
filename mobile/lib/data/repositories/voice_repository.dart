@@ -68,6 +68,32 @@ class VoiceRepository {
     return null;
   }
 
+  /// Translate text between languages via /api/v1/voice/translate.
+  Future<String?> translateText({
+    required String text,
+    required String sourceLanguage,
+    required String targetLanguage,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/v1/voice/translate',
+        data: {
+          'text': text,
+          'source_language': sourceLanguage,
+          'target_language': targetLanguage,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = Map<String, dynamic>.from(response.data as Map);
+        return data['translated_text'] as String?;
+      }
+    } catch (e) {
+      debugPrint('[VoiceRepository] translateText error: $e');
+    }
+    return null;
+  }
+
   /// Fetch supported languages from /api/v1/voice/languages.
   Future<Map<String, String>> getSupportedLanguages() async {
     try {

@@ -48,6 +48,11 @@ from app.models.schemas import (
     NMTResult,
     TTSResult,
 )
+from app.services.google_voice import (
+    GoogleSpeechService,
+    GoogleTranslationService,
+    GoogleVoiceService,
+)
 
 logger = get_logger("orca.bhashini")
 
@@ -212,6 +217,7 @@ class BhashiniService:
     def __init__(self, settings: Optional[Settings] = None) -> None:
         self._settings = settings or get_settings()
         self._client: Optional[httpx.AsyncClient] = None
+        self._google_voice = GoogleVoiceService(self._settings)
 
     # -- lifecycle -----------------------------------------------------------
 
@@ -268,6 +274,8 @@ class BhashiniService:
 
         # 2. Mock mode — fast path
         if self._settings.use_bhashini_mock:
+            if self._settings.is_google_configured and not self._settings.google_mock_mode:
+                return await self._google_voice.transcribe_audio(audio_data, language_code, audio_format)
             logger.info("ASR mock mode — returning deterministic transcript for '%s'", language_code)
             return self._mock_asr(language_code)
 
@@ -420,6 +428,8 @@ class BhashiniService:
             raise AudioValidationError("Translation source text is empty")
 
         if self._settings.use_bhashini_mock:
+            if self._settings.is_google_configured and not self._settings.google_mock_mode:
+                return await self._google_voice.translate_text(text, source_language, target_language)
             logger.info("NMT mock mode — returning mock translation")
             return self._mock_nmt(text, source_language, target_language)
 
@@ -556,6 +566,8 @@ class BhashiniService:
             raise AudioValidationError("TTS source text is empty")
 
         if self._settings.use_bhashini_mock:
+            if self._settings.is_google_configured and not self._settings.google_mock_mode:
+                return await self._google_voice.synthesise_speech(text, language_code, gender)
             logger.info("TTS mock mode — returning silent WAV")
             return self._mock_tts(language_code, audio_format)
 

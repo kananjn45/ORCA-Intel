@@ -6,12 +6,14 @@ class EmergencyBanner extends StatefulWidget {
   final GeofenceModel geofence;
   final VoidCallback? onEngageEvasive;
   final VoidCallback? onDismiss;
+  final VoidCallback? onSilence;
 
   const EmergencyBanner({
     super.key,
     required this.geofence,
     this.onEngageEvasive,
     this.onDismiss,
+    this.onSilence,
   });
 
   @override

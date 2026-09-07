@@ -28,8 +28,8 @@ class PfzPolygonLayer {
       markers: [
         Marker(
           point: center,
-          width: 140,
-          height: 44,
+          width: 190,
+          height: 48,
           child: GestureDetector(
             onTap: onTap,
             child: Container(
@@ -49,38 +49,42 @@ class PfzPolygonLayer {
                   ),
                 ],
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.eco_rounded,
-                    size: 13,
-                    color: AppColors.neonLime,
-                  ),
-                  SizedBox(width: 4),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'PFZ · SECTOR 04',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.neonLime,
-                          letterSpacing: 0.5,
+              child: const FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.eco_rounded,
+                      size: 13,
+                      color: AppColors.neonLime,
+                    ),
+                    SizedBox(width: 4),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'PFZ · SECTOR 04',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.neonLime,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Chlorophyll front · Active',
-                        style: TextStyle(
-                          fontSize: 7.5,
-                          color: AppColors.inkLight,
+                        Text(
+                          'Chlorophyll front · Active',
+                          style: TextStyle(
+                            fontSize: 7.5,
+                            color: AppColors.inkLight,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

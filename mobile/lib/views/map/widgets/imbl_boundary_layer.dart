@@ -27,8 +27,8 @@ class ImblBoundaryLayer {
       markers: [
         Marker(
           point: markerPosition,
-          width: 145,
-          height: 32,
+          width: 190,
+          height: 38,
           child: GestureDetector(
             onTap: onTap,
             child: Container(
@@ -48,25 +48,29 @@ class ImblBoundaryLayer {
                   ),
                 ],
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.security_rounded,
-                    size: 12,
-                    color: AppColors.safetyRed,
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    'IMBL · Maintain clearance',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.3,
-                      color: Color(0xFFFF9992),
+              child: const FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.security_rounded,
+                      size: 12,
+                      color: AppColors.safetyRed,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 4),
+                    Text(
+                      'IMBL · Maintain clearance',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                        color: Color(0xFFFF9992),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
