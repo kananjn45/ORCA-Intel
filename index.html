@@ -17,7 +17,7 @@
 
 <body>
   <main class="app-shell">
-    <section class="map-panel" aria-label="Live marine map">
+    <section class="map-panel" aria-label="Live marine map" data-route-api="/api/navigation/route">
       <div id="map"></div>
       <header class="topbar">
         <button class="icon-button menu-button" aria-label="Open menu"><span></span><span></span></button>
@@ -34,7 +34,7 @@
       <div class="layer-control" role="group" aria-label="Map layers">
         <button class="layer active" data-layer="route"><i class="blue"></i>Route</button>
         <button class="layer active" data-layer="pfz"><i class="green"></i>PFZ</button>
-        <button class="layer active" data-layer="hazards"><i class="orange"></i>Hazards</button>
+        <button class="layer active" data-layer="hazards"><i class="orange"></i>Wave risk</button>
         <button class="layer active" data-layer="border"><i class="red"></i>IMBL</button>
       </div>
     </section>
