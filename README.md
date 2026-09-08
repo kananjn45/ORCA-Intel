@@ -294,7 +294,7 @@ ORCA-Intel/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone [https://github.com/your-org/ORCA-Intel.git](https://github.com/kananjn45/ORCA-Intel.git)
+git clone https://github.com/your-org/ORCA-Intel.git
 cd ORCA-Intel
 ```
 
