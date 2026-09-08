@@ -36,22 +36,22 @@ class ConversationalSheet extends StatelessWidget {
         (loc['weatherStatusEn'] as String? ?? 'Sea conditions calm (Wave: 1.3m, Wind: 12.5 kts). Sovereign waters safe.');
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 10 + bottomInset),
+          padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottomInset),
           decoration: BoxDecoration(
-            color: AppColors.cardSurface.withOpacity(0.96),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            color: Colors.white.withOpacity(0.98),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             border: const Border(
-              top: BorderSide(color: AppColors.navyDark, width: 1.5),
+              top: BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 24,
-                offset: const Offset(0, -6),
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
               ),
             ],
           ),
@@ -62,9 +62,9 @@ class ConversationalSheet extends StatelessWidget {
               Container(
                 width: 36,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: 8),
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.accentLight.withOpacity(0.3),
+                  color: const Color(0xFFCBD5E1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -76,42 +76,42 @@ class ConversationalSheet extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 7,
-                        height: 7,
+                        width: 8,
+                        height: 8,
                         decoration: const BoxDecoration(
-                          color: AppColors.primaryBlue,
+                          color: Color(0xFF0284C7),
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       const Text(
                         'MARINE INTELLIGENCE ADVISOR',
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.iceWhite,
-                          letterSpacing: 1.0,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.navyDark.withOpacity(0.5),
+                      color: const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.verified_rounded, size: 11, color: AppColors.bioGreen),
+                        const Icon(Icons.verified_rounded, size: 12, color: Color(0xFF16A34A)),
                         const SizedBox(width: 4),
                         Text(
                           loc['guardrails'] as String,
                           style: const TextStyle(
-                            fontSize: 9,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.accentLight,
+                            color: Color(0xFF475569),
                           ),
                         ),
                       ],
@@ -120,23 +120,16 @@ class ConversationalSheet extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              // 3. Executive Marine Intelligence Card (No fake chat bubbles)
+              // 3. Executive Marine Intelligence Card
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.cardSurfaceLight,
-                      AppColors.cardSurface,
-                    ],
-                  ),
+                  color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.navyDark, width: 1.2),
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,9 +139,9 @@ class ConversationalSheet extends StatelessWidget {
                     Text(
                       advisoryText,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.iceWhite,
+                        color: Color(0xFF0F172A),
                         height: 1.35,
                       ),
                       maxLines: 2,
@@ -159,9 +152,9 @@ class ConversationalSheet extends StatelessWidget {
                     Text(
                       englishText,
                       style: const TextStyle(
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.accentLight,
+                        color: Color(0xFF64748B),
                         height: 1.25,
                       ),
                       maxLines: 1,
@@ -171,7 +164,7 @@ class ConversationalSheet extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
               // 4. Tactical Quick Inquiries
               SizedBox(
@@ -185,9 +178,9 @@ class ConversationalSheet extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: ActionChip(
-                        backgroundColor: AppColors.cardSurfaceLight,
-                        side: BorderSide(
-                          color: AppColors.navyDark,
+                        backgroundColor: const Color(0xFFF1F5F9),
+                        side: const BorderSide(
+                          color: Color(0xFFCBD5E1),
                           width: 1.0,
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
@@ -196,7 +189,7 @@ class ConversationalSheet extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.iceWhite,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
                         onPressed: () => onQuickPromptTap?.call(prompt),
@@ -206,7 +199,7 @@ class ConversationalSheet extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
 
               // 5. Tactical Push-to-Talk Controller
               VoiceMicButton(

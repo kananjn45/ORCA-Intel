@@ -51,14 +51,14 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth <= 0 || constraints.maxHeight <= 0) {
-          return Container(color: AppColors.bgMidnight);
+          return Container(color: const Color(0xFFF8FAFC));
         }
 
         final center = Offset(constraints.maxWidth / 2, constraints.maxHeight * 0.40);
 
         return Stack(
           children: [
-            // 1. Deep Ocean Bathymetric Base & Chart Grid
+            // 1. Light Ocean Bathymetric Base & Chart Grid
             Positioned.fill(
               child: AnimatedBuilder(
                 animation: _radarController,
@@ -85,7 +85,7 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.accentLight,
+                  color: Color(0xFF0369A1),
                   letterSpacing: 1.5,
                 ),
               ),
@@ -98,7 +98,7 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.accentLight,
+                  color: Color(0xFF0369A1),
                 ),
               ),
             ),
@@ -110,7 +110,7 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.accentLight,
+                  color: Color(0xFF0369A1),
                 ),
               ),
             ),
@@ -122,7 +122,7 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.accentLight,
+                  color: Color(0xFF0369A1),
                 ),
               ),
             ),
@@ -136,16 +136,23 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.cardSurface.withOpacity(0.85),
+                    color: Colors.white.withOpacity(0.92),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.navyDark),
+                    border: Border.all(color: const Color(0xFFCBD5E1)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: const Text(
                     'PALK STRAIT • RAMESWARAM SECTOR',
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.accentLight,
+                      color: Color(0xFF0F172A),
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -162,13 +169,14 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: AppColors.criticalRed.withOpacity(0.16),
+                    color: Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.criticalRed, width: 1.4),
+                    border: Border.all(color: const Color(0xFFEF4444), width: 1.4),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.criticalRed.withOpacity(0.25),
+                        color: const Color(0xFFEF4444).withOpacity(0.2),
                         blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
@@ -179,7 +187,7 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                         width: 7,
                         height: 7,
                         decoration: const BoxDecoration(
-                          color: AppColors.criticalRed,
+                          color: Color(0xFFDC2626),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -189,12 +197,12 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                         style: const TextStyle(
                           fontSize: 9.5,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.criticalRed,
+                          color: Color(0xFFDC2626),
                           letterSpacing: 0.6,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.touch_app_rounded, size: 10, color: AppColors.criticalRed),
+                      const Icon(Icons.touch_app_rounded, size: 10, color: Color(0xFFDC2626)),
                     ],
                   ),
                 ),
@@ -210,16 +218,17 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.cardSurface.withOpacity(0.95),
+                    color: Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: widget.showPfzCourse ? AppColors.bioGreen : AppColors.bioGreen.withOpacity(0.7),
+                      color: widget.showPfzCourse ? const Color(0xFF16A34A) : const Color(0xFF22C55E),
                       width: widget.showPfzCourse ? 2.0 : 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: widget.showPfzCourse ? AppColors.bioGreen.withOpacity(0.35) : Colors.black.withOpacity(0.4),
+                        color: widget.showPfzCourse ? const Color(0xFF16A34A).withOpacity(0.25) : Colors.black.withOpacity(0.08),
                         blurRadius: widget.showPfzCourse ? 12 : 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
@@ -237,7 +246,7 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w900,
-                              color: AppColors.bioGreen,
+                              color: Color(0xFF15803D),
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -246,13 +255,13 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                             style: TextStyle(
                               fontSize: 8.5,
                               fontWeight: FontWeight.w700,
-                              color: widget.showPfzCourse ? AppColors.iceWhite : AppColors.accentLight,
+                              color: widget.showPfzCourse ? const Color(0xFF0F172A) : const Color(0xFF475569),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.touch_app_rounded, size: 10, color: AppColors.bioGreen),
+                      const Icon(Icons.touch_app_rounded, size: 10, color: Color(0xFF15803D)),
                     ],
                   ),
                 ),
@@ -284,8 +293,8 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
                                 colors: [
-                                  AppColors.primaryBlue,
-                                  AppColors.primaryBlue.withOpacity(0.0),
+                                  const Color(0xFF0284C7),
+                                  const Color(0xFF0284C7).withOpacity(0.0),
                                 ],
                               ),
                             ),
@@ -297,13 +306,13 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                           height: 36,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.navyDark,
-                            border: Border.all(color: AppColors.iceWhite, width: 2),
+                            color: const Color(0xFF0284C7),
+                            border: Border.all(color: Colors.white, width: 2.5),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryBlue.withOpacity(0.5),
-                                blurRadius: 14,
-                                spreadRadius: 2,
+                                color: const Color(0xFF0284C7).withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
@@ -311,7 +320,7 @@ class _TacticalRadarCanvasState extends State<TacticalRadarCanvas> with SingleTi
                             child: Icon(
                               Icons.navigation_rounded,
                               size: 18,
-                              color: AppColors.iceWhite,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -350,7 +359,7 @@ class _MarineChartPainter extends CustomPainter {
       (center.dy.isNaN || center.dy.isInfinite) ? size.height * 0.40 : center.dy,
     );
 
-    // 1. Smooth Depth Bathymetry Gradient
+    // 1. Light Coastal Bathymetric Radial Gradient
     final normX = ((safeCenter.dx / size.width) * 2 - 1).clamp(-1.0, 1.0);
     final normY = ((safeCenter.dy / size.height) * 2 - 1).clamp(-1.0, 1.0);
 
@@ -358,9 +367,9 @@ class _MarineChartPainter extends CustomPainter {
       center: Alignment(normX, normY),
       radius: 0.65,
       colors: const [
-        Color(0xFF0C2448),
-        Color(0xFF081730),
-        Color(0xFF051122),
+        Color(0xFFE0F2FE), // Light sky coastal blue
+        Color(0xFFF0F9FF), // Ice blue wash
+        Color(0xFFF8FAFC), // Off-white clean background
       ],
       stops: const [0.0, 0.55, 1.0],
     );
@@ -369,7 +378,7 @@ class _MarineChartPainter extends CustomPainter {
 
     // 2. Subtle Nautical Grid Lines
     final gridPaint = Paint()
-      ..color = AppColors.navyDark.withOpacity(0.45)
+      ..color = const Color(0xFFBAE6FD).withOpacity(0.5)
       ..strokeWidth = 0.8;
 
     const gridStep = 44.0;
@@ -396,16 +405,16 @@ class _MarineChartPainter extends CustomPainter {
       final alpha = ring['alpha'] as double;
       final label = ring['label'] as String;
 
-      ringPaint.color = AppColors.accentLight.withOpacity(alpha);
+      ringPaint.color = const Color(0xFF0284C7).withOpacity(alpha * 1.5);
       canvas.drawCircle(safeCenter, r, ringPaint);
 
       final tp = TextPainter(
         text: TextSpan(
           text: label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 8.5,
-            fontWeight: FontWeight.w700,
-            color: AppColors.accentLight.withOpacity(0.55),
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0369A1),
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -428,7 +437,7 @@ class _MarineChartPainter extends CustomPainter {
         endAngle: end,
         colors: [
           Colors.transparent,
-          AppColors.primaryBlue.withOpacity(0.09),
+          const Color(0xFF0284C7).withOpacity(0.12),
         ],
         stops: const [0.0, 1.0],
       ).createShader(Rect.fromCircle(center: safeCenter, radius: 160));
@@ -437,7 +446,7 @@ class _MarineChartPainter extends CustomPainter {
 
     // 5. Crosshair Ticks
     final crossPaint = Paint()
-      ..color = AppColors.accentLight.withOpacity(0.2)
+      ..color = const Color(0xFF0284C7).withOpacity(0.25)
       ..strokeWidth = 0.8;
 
     canvas.drawLine(Offset(safeCenter.dx - 160, safeCenter.dy), Offset(safeCenter.dx + 160, safeCenter.dy), crossPaint);

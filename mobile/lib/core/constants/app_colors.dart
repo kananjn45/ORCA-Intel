@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // ============================================================================
-  // Web UI High-Tech Marine Design System (SeaSentinel / ORCA)
+  // Web UI High-Tech Marine Design System (ORCA-Intel)
   // ============================================================================
   static const Color brandNavy = Color(0xFF061C2C);        // Deep obsidian midnight sea
   static const Color brandSurface = Color(0xFF082537);     // Command deck and card surface

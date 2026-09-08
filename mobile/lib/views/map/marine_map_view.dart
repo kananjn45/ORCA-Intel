@@ -20,7 +20,6 @@ class MarineMapView extends StatefulWidget {
   final bool showEvasiveRoute;
   final bool isDarkMode;
   final String currentLanguageName;
-  final VoidCallback? onThemeToggle;
   final VoidCallback? onRecenterTap;
   final VoidCallback? onMenuTap;
   final VoidCallback? onAvatarTap;
@@ -35,9 +34,8 @@ class MarineMapView extends StatefulWidget {
     required this.geofence,
     this.showPfzRoute = true,
     this.showEvasiveRoute = false,
-    this.isDarkMode = true,
+    this.isDarkMode = false,
     this.currentLanguageName = 'English',
-    this.onThemeToggle,
     this.onRecenterTap,
     this.onMenuTap,
     this.onAvatarTap,
@@ -254,6 +252,7 @@ class _MarineMapViewState extends State<MarineMapView>
               ImblBoundaryLayer.buildBorderWarningMarker(
                 markerPosition: imblMarker,
                 onTap: widget.onImblTap,
+                isDarkMode: widget.isDarkMode,
               ),
             ],
 
@@ -265,8 +264,8 @@ class _MarineMapViewState extends State<MarineMapView>
                     point: hazardCenter,
                     radius: 7700,
                     useRadiusInMeter: true,
-                    color: AppColors.hazardAmber.withOpacity(0.20),
-                    borderColor: AppColors.hazardAmber,
+                    color: (widget.isDarkMode ? AppColors.hazardAmber : const Color(0xFFD97706)).withOpacity(0.16),
+                    borderColor: widget.isDarkMode ? AppColors.hazardAmber : const Color(0xFFD97706),
                     borderStrokeWidth: 2.0,
                   ),
                 ],
@@ -276,26 +275,27 @@ class _MarineMapViewState extends State<MarineMapView>
                   Marker(
                     point: hazardCenter,
                     width: 190,
-                    height: 44,
+                    height: 46,
                     child: GestureDetector(
                       onTap: widget.onHazardsTap,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.brandSurfaceGlass,
-                          borderRadius: BorderRadius.circular(5),
+                          color: widget.isDarkMode ? AppColors.brandSurfaceGlass : Colors.white.withOpacity(0.96),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppColors.hazardAmber.withOpacity(0.8),
-                            width: 1,
+                            color: widget.isDarkMode ? AppColors.hazardAmber.withOpacity(0.8) : const Color(0xFFD97706),
+                            width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
-                              blurRadius: 4,
+                              color: Colors.black.withOpacity(widget.isDarkMode ? 0.4 : 0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                        child: const FittedBox(
+                        child: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
                           child: Row(
@@ -303,10 +303,10 @@ class _MarineMapViewState extends State<MarineMapView>
                             children: [
                               Icon(
                                 Icons.waves_rounded,
-                                size: 13,
-                                color: AppColors.hazardAmber,
+                                size: 14,
+                                color: widget.isDarkMode ? AppColors.hazardAmber : const Color(0xFFD97706),
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 5),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -314,17 +314,18 @@ class _MarineMapViewState extends State<MarineMapView>
                                   Text(
                                     'WEATHER WATCH',
                                     style: TextStyle(
-                                      fontSize: 8.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.hazardAmber,
-                                      letterSpacing: 0.3,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      color: widget.isDarkMode ? AppColors.hazardAmber : const Color(0xFFB45309),
+                                      letterSpacing: 0.4,
                                     ),
                                   ),
                                   Text(
                                     'Moderate swell window',
                                     style: TextStyle(
                                       fontSize: 7.5,
-                                      color: AppColors.inkLight,
+                                      fontWeight: FontWeight.w600,
+                                      color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF334155),
                                     ),
                                   ),
                                 ],
@@ -341,20 +342,28 @@ class _MarineMapViewState extends State<MarineMapView>
 
             // PFZ Layer
             if (_layerPfz) ...[
-              PfzPolygonLayer.buildPolygonLayer(boundaryPoints: pfzPolygon),
+              PfzPolygonLayer.buildPolygonLayer(
+                boundaryPoints: pfzPolygon,
+                isDarkMode: widget.isDarkMode,
+              ),
               PfzPolygonLayer.buildCenterLabelMarker(
                 center: pfzCenter,
                 onTap: widget.onPfzTap,
+                isDarkMode: widget.isDarkMode,
               ),
             ],
 
             // Active Safe Route Polyline & Destination
             if (_layerRoute && (widget.showPfzRoute || !widget.showEvasiveRoute)) ...[
-              AstarRouteLayer.buildPolylineLayer(waypoints: waypoints),
+              AstarRouteLayer.buildPolylineLayer(
+                waypoints: waypoints,
+                isDarkMode: widget.isDarkMode,
+              ),
               AstarRouteLayer.buildDestinationMarkerLayer(
                 destination: destination,
                 label: 'PFZ Sector 04',
                 onTap: widget.onPfzTap,
+                isDarkMode: widget.isDarkMode,
               ),
             ],
 
@@ -369,6 +378,7 @@ class _MarineMapViewState extends State<MarineMapView>
                     headingDeg: widget.telemetry.headingDeg,
                     speedKnots: widget.telemetry.speedKnots,
                     onTap: widget.onMenuTap,
+                    isDarkMode: widget.isDarkMode,
                   ),
                 ),
               ],
@@ -449,7 +459,7 @@ class _MarineMapViewState extends State<MarineMapView>
                     ),
                   ),
 
-                  // Brand Mark ⌁ SeaSentinel
+                  // Brand Mark ⌁ ORCA-Intel
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -476,9 +486,9 @@ class _MarineMapViewState extends State<MarineMapView>
                             color: widget.isDarkMode ? AppColors.inkLight : const Color(0xFF0F172A),
                           ),
                           children: [
-                            const TextSpan(text: 'Sea'),
+                            const TextSpan(text: 'ORCA-'),
                             TextSpan(
-                              text: 'Sentinel',
+                              text: 'Intel',
                               style: TextStyle(
                                 color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF0284C7),
                               ),
@@ -489,56 +499,11 @@ class _MarineMapViewState extends State<MarineMapView>
                     ],
                   ),
 
-                  // Actions: Theme Toggle + Profile / Language Avatar
+                  // Action: Language Selector Pill
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Quick Sunlight / Tactical Night Theme Toggle
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.mediumImpact();
-                          widget.onThemeToggle?.call();
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                            child: Container(
-                              width: 42,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: widget.isDarkMode
-                                    ? const Color(0xD9041926)
-                                    : Colors.white.withOpacity(0.92),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: widget.isDarkMode
-                                      ? AppColors.neonLime.withOpacity(0.5)
-                                      : const Color(0xFF0284C7).withOpacity(0.5),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(widget.isDarkMode ? 0.35 : 0.08),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  widget.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                  size: 19,
-                                  color: widget.isDarkMode ? AppColors.neonLime : const Color(0xFF0284C7),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Direct Language Pill Button (replaces generic avatar)
+                      // Direct Language Pill Button
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();

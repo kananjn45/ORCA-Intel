@@ -75,15 +75,8 @@ void main() {
       expect(find.byIcon(Icons.navigation_rounded), findsOneWidget);
     });
 
-    test('ThemeController toggles between dark tactical and sunlight deck mode', () {
-      ThemeController.setDarkMode(true);
-      expect(ThemeController.isDarkMode.value, isTrue);
-
-      ThemeController.toggleTheme();
+    test('ThemeController is locked to sunlight deck light mode', () {
       expect(ThemeController.isDarkMode.value, isFalse);
-
-      ThemeController.toggleTheme();
-      expect(ThemeController.isDarkMode.value, isTrue);
     });
 
     testWidgets('MapLayerControls supports collapsible header and sunlight light theme', (WidgetTester tester) async {
@@ -140,9 +133,8 @@ void main() {
       expect(find.text('Radar'), findsOneWidget);
       expect(find.text('Offline'), findsOneWidget);
 
-      // Verify Tab 0 (Map) is active by default: shows language pill and theme toggle
+      // Verify Tab 0 (Map) is active by default: shows language pill
       expect(find.text('English'), findsOneWidget);
-      expect(find.byIcon(Icons.wb_sunny_rounded), findsOneWidget);
 
       // Tap Tab 1: Safety & Telemetry
       await tester.tap(find.text('Safety'));
@@ -165,7 +157,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('SAFETY & TELEMETRY'), findsNothing);
-      expect(find.byIcon(Icons.wb_sunny_rounded), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
 
       // Cleanly unmount to dispose repeating pulse animations
       await tester.pumpWidget(const SizedBox());

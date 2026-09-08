@@ -106,25 +106,25 @@ class _VoiceMicButtonState extends State<VoiceMicButton> with SingleTickerProvid
                     end: Alignment.bottomRight,
                     colors: widget.isRecording
                         ? [AppColors.criticalRed, const Color(0xFFC62828)]
-                        : [AppColors.primaryBlue, AppColors.navyDark],
+                        : [const Color(0xFF0284C7), const Color(0xFF0369A1)],
                   ),
                   border: Border.all(
-                    color: widget.isRecording ? Colors.white : AppColors.accentLight.withOpacity(0.6),
+                    color: widget.isRecording ? Colors.white : const Color(0xFFBAE6FD),
                     width: 2.0,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (widget.isRecording ? AppColors.criticalRed : AppColors.primaryBlue)
+                      color: (widget.isRecording ? AppColors.criticalRed : const Color(0xFF0284C7))
                           .withOpacity(widget.isRecording ? 0.6 : 0.35),
                       blurRadius: widget.isRecording ? 24 : 14,
                       spreadRadius: widget.isRecording ? 4 : 1,
                     ),
                   ],
                 ),
-                child: Icon(
-                  widget.isRecording ? Icons.mic : Icons.mic_none_rounded,
-                  size: widget.isRecording ? 36 : 32,
-                  color: AppColors.iceWhite,
+                child: const Icon(
+                  Icons.mic,
+                  size: 32,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -139,7 +139,7 @@ class _VoiceMicButtonState extends State<VoiceMicButton> with SingleTickerProvid
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: widget.isRecording ? AppColors.criticalRed : AppColors.accentLight,
+            color: widget.isRecording ? AppColors.criticalRed : const Color(0xFF64748B),
             letterSpacing: 0.3,
           ),
           child: Text(

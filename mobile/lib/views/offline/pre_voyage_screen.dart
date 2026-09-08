@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
 import '../../data/local/offline_cache_manager.dart';
 import '../../data/repositories/marine_repository.dart';
 import 'widgets/pack_download_progress.dart';
@@ -121,7 +120,7 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            backgroundColor: AppColors.bioGreen,
+            backgroundColor: Color(0xFF16A34A),
             content: Text(
               '⚓ 24h Offline Marine Pack active! App is ready for disconnected sea trips.',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -141,12 +140,26 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.abyssBlack,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: AppColors.deepOcean,
-        title: const Text('Pre-Voyage Offline Sync'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: const Color(0xFFE2E8F0), height: 1),
+        ),
+        title: const Text(
+          'Pre-Voyage Offline Sync',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
+            letterSpacing: 0.2,
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.radarCyan),
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF0F172A)),
           onPressed: () {
             if (widget.onBack != null) {
               widget.onBack!();
@@ -166,26 +179,48 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.deepOcean,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.glassBorder),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.wifi_off_outlined, color: AppColors.radarCyan, size: 28),
-                    SizedBox(width: 12),
-                    Expanded(
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE0F2FE),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.wifi_off_rounded, color: Color(0xFF0284C7), size: 26),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'High-Seas Offline Protection',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
                           ),
                           SizedBox(height: 3),
                           Text(
                             'Downloads local boundary vectors and weather grids to phone memory. Operates at deep sea with zero cellular data.',
-                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: Color(0xFF64748B),
+                              height: 1.3,
+                            ),
                           ),
                         ],
                       ),
@@ -199,26 +234,45 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
               // Coastal Sector Selector
               const Text(
                 'SELECT DEPARTURE SECTOR',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.8),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF475569),
+                  letterSpacing: 0.8,
+                ),
               ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.marineSurface.withOpacity(0.6),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.glassBorder),
+                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _selectedSector,
                     isExpanded: true,
-                    dropdownColor: AppColors.deepOcean,
-                    icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.radarCyan),
+                    dropdownColor: Colors.white,
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF0284C7)),
                     items: _sectors.map((s) {
                       return DropdownMenuItem(
                         value: s,
-                        child: Text(s, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                        child: Text(
+                          s,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
                       );
                     }).toList(),
                     onChanged: (val) {
@@ -230,16 +284,43 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
 
               const SizedBox(height: 18),
 
-              // Data Components Checklist
+              // Data Components Checklist Card
               const Text(
                 'OFFLINE PACK COMPONENTS (~5.8 MB)',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.8),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF475569),
+                  letterSpacing: 0.8,
+                ),
               ),
               const SizedBox(height: 8),
-              _buildComponentRow('IMBL & Coastal Boundary Vectors', '520 KB', Icons.polyline),
-              _buildComponentRow('24h Marine Wave & Swell Grid', '1.2 MB', Icons.waves),
-              _buildComponentRow('Active INCOIS PFZ Advisories', '340 KB', Icons.grain),
-              _buildComponentRow('Emergency Voice Siren Audio Pack', '3.8 MB', Icons.volume_up),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _buildComponentRow('IMBL & Coastal Boundary Vectors', '520 KB', Icons.polyline_rounded),
+                    const Divider(height: 12, color: Color(0xFFF1F5F9)),
+                    _buildComponentRow('24h Marine Wave & Swell Grid', '1.2 MB', Icons.waves_rounded),
+                    const Divider(height: 12, color: Color(0xFFF1F5F9)),
+                    _buildComponentRow('Active INCOIS PFZ Advisories', '340 KB', Icons.grain_rounded),
+                    const Divider(height: 12, color: Color(0xFFF1F5F9)),
+                    _buildComponentRow('Emergency Voice Siren Audio Pack', '3.8 MB', Icons.volume_up_rounded),
+                  ],
+                ),
+              ),
 
               const Spacer(),
 
@@ -259,16 +340,17 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
                 child: ElevatedButton(
                   onPressed: _isDownloading ? null : _startDownload,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isPackActive ? AppColors.bioGreen : AppColors.radarCyan,
-                    foregroundColor: AppColors.abyssBlack,
+                    backgroundColor: _isPackActive ? const Color(0xFF16A34A) : const Color(0xFF0284C7),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    elevation: 0,
+                    elevation: 2,
+                    shadowColor: (_isPackActive ? const Color(0xFF16A34A) : const Color(0xFF0284C7)).withOpacity(0.3),
                   ),
                   child: Text(
                     _isDownloading
                         ? 'DOWNLOADING PACK...'
                         : (_isPackActive ? 'UPDATE 24H OFFLINE PACK' : 'DOWNLOAD 24H OFFLINE PACK'),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0.8),
+                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, letterSpacing: 0.8),
                   ),
                 ),
               ),
@@ -284,14 +366,33 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: AppColors.radarCyan),
-          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F9FF),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(icon, size: 14, color: const Color(0xFF0284C7)),
+          ),
+          const SizedBox(width: 10),
           Expanded(
-            child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E293B),
+              ),
+            ),
           ),
           Text(
             size,
-            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontFamily: 'monospace'),
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF64748B),
+              fontFamily: 'monospace',
+            ),
           ),
         ],
       ),

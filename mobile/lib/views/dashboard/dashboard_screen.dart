@@ -177,10 +177,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showPfzDetailsModal() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        side: BorderSide(color: AppColors.neonLime, width: 1.5),
       ),
       builder: (ctx) {
         return Padding(
@@ -194,14 +193,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.eco_rounded, color: AppColors.neonLime, size: 24),
+                      Icon(Icons.eco_rounded, color: Color(0xFF16A34A), size: 24),
                       SizedBox(width: 8),
                       Text(
                         'POTENTIAL FISHING ZONE (PFZ)',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.inkLight,
+                          color: Color(0xFF0F172A),
                         ),
                       ),
                     ],
@@ -209,7 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.neonLime.withOpacity(0.2),
+                      color: const Color(0xFFDCFCE7),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
@@ -217,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.neonLime,
+                        color: Color(0xFF16A34A),
                       ),
                     ),
                   ),
@@ -233,8 +232,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.neonLime,
-                    foregroundColor: const Color(0xFF092238),
+                    backgroundColor: const Color(0xFF16A34A),
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -250,12 +249,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        backgroundColor: AppColors.brandSurface,
+                        backgroundColor: const Color(0xFF16A34A),
                         content: Text(
                           _showPfzCourse
-                              ? '🧭 Cyan Safe Route Plotted to PFZ Sector 04'
+                              ? '🧭 Safe Route Plotted to PFZ Sector 04'
                               : 'Route cleared',
-                          style: const TextStyle(color: AppColors.inkLight),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
                     );
@@ -272,10 +271,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showBorderDetailsModal() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        side: BorderSide(color: AppColors.safetyRed, width: 1.5),
       ),
       builder: (ctx) {
         final dist = _geofence.distanceToImblKm;
@@ -290,14 +288,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.shield_rounded, color: AppColors.safetyRed, size: 24),
+                      Icon(Icons.shield_rounded, color: Color(0xFFDC2626), size: 24),
                       SizedBox(width: 8),
                       Text(
                         'IMBL BORDER MONITOR',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.safetyRed,
+                          color: Color(0xFFDC2626),
                         ),
                       ),
                     ],
@@ -305,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.safetyRed.withOpacity(0.2),
+                      color: const Color(0xFFFEE2E2),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -313,7 +311,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.safetyRed,
+                        color: Color(0xFFDC2626),
                       ),
                     ),
                   ),
@@ -329,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.safetyRed,
+                    backgroundColor: const Color(0xFFDC2626),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -347,10 +345,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        backgroundColor: AppColors.brandSurface,
+                        backgroundColor: Color(0xFFDC2626),
                         content: Text(
                           '⚠️ Evasive course plotted: Steer 265° Westward away from IMBL boundary',
-                          style: TextStyle(color: AppColors.inkLight),
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
                     );
@@ -367,10 +365,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showWeatherDetailsModal() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        side: BorderSide(color: AppColors.electricCyan, width: 1.5),
       ),
       builder: (ctx) {
         return Padding(
@@ -384,14 +381,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.waves_rounded, color: AppColors.electricCyan, size: 24),
+                      Icon(Icons.waves_rounded, color: Color(0xFF0284C7), size: 24),
                       SizedBox(width: 8),
                       Text(
                         'LIVE MARINE WEATHER',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.inkLight,
+                          color: Color(0xFF0F172A),
                         ),
                       ),
                     ],
@@ -399,7 +396,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.neonLime.withOpacity(0.2),
+                      color: const Color(0xFFDCFCE7),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
@@ -407,7 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.neonLime,
+                        color: Color(0xFF16A34A),
                       ),
                     ),
                   ),
@@ -424,8 +421,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.electricCyan,
-                    side: const BorderSide(color: AppColors.electricCyan),
+                    foregroundColor: const Color(0xFF0284C7),
+                    side: const BorderSide(color: Color(0xFF0284C7)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -436,10 +433,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     _fetchLiveBackendData();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        backgroundColor: AppColors.brandSurface,
+                        backgroundColor: Color(0xFF0284C7),
                         content: Text(
                           '🌊 Re-ingested latest oceanographic satellite feed',
-                          style: TextStyle(color: AppColors.inkLight),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     );
@@ -456,10 +453,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showSimulationControls() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.cardSurface,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        side: BorderSide(color: AppColors.neonLime, width: 1.5),
       ),
       builder: (ctx) {
         return Padding(
@@ -470,14 +466,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.science_rounded, color: AppColors.neonLime, size: 24),
+                  Icon(Icons.science_rounded, color: Color(0xFF0284C7), size: 24),
                   SizedBox(width: 8),
                   Text(
                     'TEST SCENARIO SIMULATOR',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.inkLight,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
                 ],
@@ -485,16 +481,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 12),
               const Text(
                 'Test how the live system reacts to different coastal & border scenarios:',
-                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
               ),
               const SizedBox(height: 14),
               // Scenario 1
               ListTile(
-                tileColor: AppColors.cardSurfaceLight,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                leading: const Icon(Icons.shield_rounded, color: AppColors.neonLime),
-                title: const Text('Scenario 1: Tamil Nadu Coast / Safe Harbor (18.4 km clearance)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.inkLight)),
-                subtitle: const Text('Lat 12.80°N, Lon 80.36°E • Web UI Demo Coordinates', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                tileColor: const Color(0xFFF8FAFC),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                leading: const Icon(Icons.shield_rounded, color: Color(0xFF16A34A)),
+                title: const Text('Scenario 1: Tamil Nadu Coast / Safe Harbor (18.4 km clearance)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                subtitle: const Text('Lat 12.80°N, Lon 80.36°E • Web UI Demo Coordinates', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
                 onTap: () {
                   Navigator.pop(ctx);
                   _setScenario(lat: 12.80, lon: 80.36, heading: 82.0, speed: 8.4);
@@ -503,11 +502,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 8),
               // Scenario 2
               ListTile(
-                tileColor: AppColors.cardSurfaceLight,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                leading: const Icon(Icons.warning_amber_rounded, color: AppColors.hazardAmber),
-                title: const Text('Scenario 2: Palk Strait Caution (4.8 km to border)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.inkLight)),
-                subtitle: const Text('Lat 9.285°N, Lon 79.312°E • 5km buffer zone', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                tileColor: const Color(0xFFF8FAFC),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                leading: const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706)),
+                title: const Text('Scenario 2: Palk Strait Caution (4.8 km to border)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                subtitle: const Text('Lat 9.285°N, Lon 79.312°E • 5km buffer zone', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
                 onTap: () {
                   Navigator.pop(ctx);
                   _setScenario(lat: 9.285, lon: 79.312, heading: 82.0, speed: 8.4);
@@ -516,11 +518,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 8),
               // Scenario 3
               ListTile(
-                tileColor: AppColors.cardSurfaceLight,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                leading: const Icon(Icons.dangerous_rounded, color: AppColors.safetyRed),
-                title: const Text('Scenario 3: Border Breach Danger (1.4 km to border!)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.safetyRed)),
-                subtitle: const Text('Lat 9.345°N, Lon 79.412°E • Triggers Critical Evasive Alarm', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                tileColor: const Color(0xFFF8FAFC),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                leading: const Icon(Icons.dangerous_rounded, color: Color(0xFFDC2626)),
+                title: const Text('Scenario 3: Border Breach Danger (1.4 km to border!)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFDC2626))),
+                subtitle: const Text('Lat 9.345°N, Lon 79.412°E • Triggers Critical Evasive Alarm', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
                 onTap: () {
                   Navigator.pop(ctx);
                   _setScenario(lat: 9.345, lon: 79.412, heading: 90.0, speed: 11.2);
@@ -529,11 +534,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 8),
               // Scenario 4
               ListTile(
-                tileColor: AppColors.cardSurfaceLight,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                leading: const Icon(Icons.thunderstorm_rounded, color: AppColors.hazardAmber),
-                title: const Text('Scenario 4: High Seas Cyclone & Shelter Harbor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.hazardAmber)),
-                subtitle: const Text('Wave: 3.2m • Wind: 34 kts • Emergency evasion', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                tileColor: const Color(0xFFF8FAFC),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                leading: const Icon(Icons.thunderstorm_rounded, color: Color(0xFFD97706)),
+                title: const Text('Scenario 4: High Seas Cyclone & Shelter Harbor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFD97706))),
+                subtitle: const Text('Wave: 3.2m • Wind: 34 kts • Emergency evasion', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
                 onTap: () {
                   Navigator.pop(ctx);
                   _setStormScenario();
@@ -631,13 +639,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             width: 130,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.inkLight),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
             ),
           ),
         ],
@@ -759,7 +767,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       showEvasiveRoute: _showEvasiveCourse,
       isDarkMode: isDark,
       currentLanguageName: _currentLanguageName,
-      onThemeToggle: ThemeController.toggleTheme,
       onMenuTap: _showSimulationControls,
       onAvatarTap: () {
         showModalBottomSheet(

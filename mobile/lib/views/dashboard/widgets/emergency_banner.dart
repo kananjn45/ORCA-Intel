@@ -60,7 +60,7 @@ class _EmergencyBannerState extends State<EmergencyBanner>
           margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.cardSurface.withOpacity(0.96),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: bannerColor.withOpacity(_glowAnimation.value),
@@ -68,7 +68,7 @@ class _EmergencyBannerState extends State<EmergencyBanner>
             ),
             boxShadow: [
               BoxShadow(
-                color: bannerColor.withOpacity(_glowAnimation.value * 0.45),
+                color: bannerColor.withOpacity(_glowAnimation.value * 0.3),
                 blurRadius: 18,
                 spreadRadius: 2,
               ),
@@ -84,7 +84,7 @@ class _EmergencyBannerState extends State<EmergencyBanner>
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: bannerColor.withOpacity(0.2),
+                      color: bannerColor.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -118,7 +118,7 @@ class _EmergencyBannerState extends State<EmergencyBanner>
                               : 'Vessel approaching sovereign maritime border',
                           style: const TextStyle(
                             fontSize: 10.5,
-                            color: AppColors.accentLight,
+                            color: Color(0xFF64748B),
                           ),
                         ),
                       ],
@@ -129,13 +129,13 @@ class _EmergencyBannerState extends State<EmergencyBanner>
                       onTap: widget.onDismiss,
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: AppColors.cardSurfaceLight,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF1F5F9),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.close_rounded,
-                          color: AppColors.accentLight,
+                          color: Color(0xFF64748B),
                           size: 16,
                         ),
                       ),
@@ -169,7 +169,7 @@ class _EmergencyBannerState extends State<EmergencyBanner>
                     child: _buildMetricTile(
                       label: 'EVASIVE HEADING',
                       value: '${evasive.toStringAsFixed(0)}° W',
-                      highlightColor: AppColors.iceWhite,
+                      highlightColor: const Color(0xFF0F172A),
                     ),
                   ),
                 ],
@@ -183,7 +183,7 @@ class _EmergencyBannerState extends State<EmergencyBanner>
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: bannerColor,
-                    foregroundColor: isCritical ? Colors.white : AppColors.abyssBlack,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -216,9 +216,9 @@ class _EmergencyBannerState extends State<EmergencyBanner>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       decoration: BoxDecoration(
-        color: AppColors.cardSurfaceLight,
+        color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +228,7 @@ class _EmergencyBannerState extends State<EmergencyBanner>
             style: const TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w700,
-              color: AppColors.accentLight,
+              color: Color(0xFF64748B),
               letterSpacing: 0.4,
             ),
           ),

@@ -9,13 +9,13 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('🚀 WIDGETS BINDING INITIALIZED 🚀');
 
-  // Lock status bar and navigation bar styling for tactical dark mode
+  // Lock status bar and navigation bar styling for clean light mode
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF050B14),
-      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
@@ -27,18 +27,12 @@ class OrcaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: ThemeController.isDarkMode,
-      builder: (context, isDark, _) {
-        return MaterialApp(
-          title: AppConstants.appName,
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.sunlightDeck,
-          darkTheme: AppTheme.darkTactical,
-          themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-          home: const DashboardScreen(),
-        );
-      },
+    return MaterialApp(
+      title: AppConstants.appName,
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.sunlightDeck,
+      themeMode: ThemeMode.light,
+      home: const DashboardScreen(),
     );
   }
 }

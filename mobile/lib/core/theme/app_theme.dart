@@ -4,17 +4,15 @@ import 'dark_tactical_theme.dart';
 import '../constants/app_colors.dart';
 
 class ThemeController {
-  static final ValueNotifier<bool> isDarkMode = ValueNotifier<bool>(true);
+  // Locked to Light Theme (Sunlight Deck) per presentation requirements
+  static final ValueNotifier<bool> isDarkMode = ValueNotifier<bool>(false);
 
   static void toggleTheme() {
-    HapticFeedback.mediumImpact();
-    isDarkMode.value = !isDarkMode.value;
+    // Theme toggle removed - app locked to Light mode
   }
 
   static void setDarkMode(bool dark) {
-    if (isDarkMode.value != dark) {
-      isDarkMode.value = dark;
-    }
+    isDarkMode.value = false;
   }
 }
 
