@@ -21,6 +21,8 @@ class AgentState(TypedDict):
     # 3. Intent Classification & Extracted Slots
     intents: List[str]              # e.g., ["weather", "pfz", "boundary", "route"]
     target_destination: Optional[Dict[str, float]] # Target Lat/Lon if user requested specific spot
+    target_location_name: Optional[str]            # e.g. "Mumbai", "Chennai", "Goa"
+    use_live_weather: Optional[bool]               # True when live Open-Meteo telemetry is loaded
     
     # 4. Specialized Worker Agent Outputs
     weather_data: Optional[Dict[str, Any]]         # Sea state, wave height, swell, wind speed

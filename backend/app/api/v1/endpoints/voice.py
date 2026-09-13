@@ -38,6 +38,7 @@ from app.models.schemas import (
     VoicePipelineResult,
 )
 from app.services.google_voice import GoogleVoiceService
+from app.services.bhashini import BhashiniService
 from app.services.tts_cache import TTSAudioCache
 from app.utils.audio_converter import convert_to_wav
 
@@ -46,15 +47,21 @@ logger = get_logger("orca.api.voice")
 router = APIRouter(tags=["Voice Pipeline"])
 
 # Shared service instances (lazy singletons)
-_voice_service: Optional[GoogleVoiceService] = None
+_google_voice_service: Optional[GoogleVoiceService] = None
+_bhashini_service: Optional[BhashiniService] = None
 _tts_cache: Optional[TTSAudioCache] = None
 
 
-def _get_service() -> GoogleVoiceService:
-    global _voice_service
-    if _voice_service is None:
-        _voice_service = GoogleVoiceService()
-    return _voice_service
+def _get_service():
+    global _google_voice_service, _bhashini_service
+    cfg = get_settings()
+    if cfg.VOICE_PROVIDER.lower() == "bhashini" or cfg.bhashini_configured:
+        if _bhashini_service is None:
+            _bhashini_service = BhashiniService()
+        return _bhashini_service
+    if _google_voice_service is None:
+        _google_voice_service = GoogleVoiceService()
+    return _google_voice_service
 
 
 def _get_cache() -> TTSAudioCache:

@@ -5,6 +5,8 @@ import 'package:orca_mobile/views/map/widgets/vessel_heading_marker.dart';
 import 'package:orca_mobile/core/constants/app_colors.dart';
 import 'package:orca_mobile/core/theme/app_theme.dart';
 import 'package:orca_mobile/views/dashboard/dashboard_screen.dart';
+import 'package:orca_mobile/views/offline/pre_voyage_screen.dart';
+import 'package:orca_mobile/data/models/coastal_sector.dart';
 
 void main() {
   group('Web UI Map Component Tests', () {
@@ -152,6 +154,14 @@ void main() {
       expect(find.text('VOICE AI ADVISORY'), findsOneWidget);
       expect(find.text('ORCA INTELLIGENCE AGENT'), findsOneWidget);
 
+      // Tap Tab 4: Offline Pre-Voyage Sync Tab
+      await tester.tap(find.text('Offline'));
+      await tester.pump();
+
+      expect(find.text('Pre-Voyage Offline Sync'), findsOneWidget);
+      expect(find.text('SELECT DEPARTURE SECTOR'), findsOneWidget);
+      expect(find.text('5 Maritime Zones'), findsOneWidget);
+
       // Tap Tab 0: Return to Map
       await tester.tap(find.text('Map'));
       await tester.pump();
@@ -163,6 +173,45 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 35));
+    });
+
+    testWidgets('PreVoyageScreen allows switching across all 5 sectors without sticking', (WidgetTester tester) async {
+      CoastalSector? chosenSector;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PreVoyageScreen(
+              currentSectorName: 'Coromandel Coast (Chennai)',
+              onSectorChanged: (s) => chosenSector = s,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Pre-Voyage Offline Sync'), findsOneWidget);
+      expect(find.text('Coromandel Coast (Chennai)'), findsOneWidget);
+
+      // Open dropdown and verify all 5 sectors appear
+      await tester.tap(find.text('Coromandel Coast (Chennai)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Palk Strait (Rameswaram)'), findsWidgets);
+      expect(find.text('Gulf of Mannar (Mandapam)'), findsWidgets);
+      expect(find.text('Andhra Coast (Visakhapatnam)'), findsWidgets);
+      expect(find.text('Gujarat Offshore (Porbandar)'), findsWidgets);
+
+      // Select Gujarat Offshore (Porbandar) from the other 4
+      await tester.tap(find.text('Gujarat Offshore (Porbandar)').last);
+      await tester.pumpAndSettle();
+
+      // Verify selected sector updated and callback triggered
+      expect(chosenSector, isNotNull);
+      expect(chosenSector!.name, 'Gujarat Offshore (Porbandar)');
+      expect(find.text('Gujarat / Arabian Sea'), findsOneWidget);
+      expect(find.textContaining('Sir Creek'), findsOneWidget);
+      expect(find.textContaining('21.64'), findsOneWidget);
     });
   });
 }

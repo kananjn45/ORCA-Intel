@@ -11,12 +11,17 @@ except ImportError:
 
 def weather_agent_node(state: AgentState) -> AgentState:
     """
-    Evaluates marine weather and sea state conditions at the vessel's current coordinate.
+    Evaluates marine weather and sea state conditions at the target or vessel's coordinate.
     Powered by Dev 3's Open-Meteo Marine API client and TTL cache.
     Populates state['weather_data'].
     """
-    vessel_lat = state.get("vessel_lat", 9.28)
-    vessel_lon = state.get("vessel_lon", 79.31)
+    # 1. If live weather data was already fetched and provided in state, preserve it!
+    if state.get("weather_data") is not None and state.get("weather_data").get("wave_height_m") is not None:
+        return state
+
+    target = state.get("target_destination")
+    vessel_lat = target["lat"] if (target and "lat" in target) else state.get("vessel_lat", 9.28)
+    vessel_lon = target["lon"] if (target and "lon" in target) else state.get("vessel_lon", 79.31)
 
     if state.get("use_live_weather"):
         try:

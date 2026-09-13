@@ -21,7 +21,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 
 from app.core.logging import get_logger
 from app.models.geojson_models import empty_feature_collection
-from app.models.schemas import MarineWeatherMetric, OfflinePackResponse, PFZFeature
+from app.models.schemas import CycloneHazardMetric, MarineWeatherMetric, OfflinePackResponse, PFZFeature
 from app.services import incois_pfz, open_meteo
 from app.services.cache import get_all_cache_stats
 
@@ -75,6 +75,23 @@ async def get_weather(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Unable to retrieve marine weather: {exc}",
+        ) from exc
+
+
+@router.get("/cyclone-hazard", response_model=CycloneHazardMetric, summary="Live Open-Meteo cyclone & storm cell detection")
+async def get_cyclone_hazard(
+    lat: float = Query(..., description="Vessel/sector center latitude", examples=[12.80]),
+    lon: float = Query(..., description="Vessel/sector center longitude", examples=[80.36]),
+) -> CycloneHazardMetric:
+    _validate_lat(lat)
+    _validate_lon(lon)
+    try:
+        return await open_meteo.detect_live_cyclone_hazard(lat, lon)
+    except Exception as exc:  # pragma: no cover
+        logger.exception("cyclone_hazard_endpoint_failed")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Unable to analyze live cyclone hazard: {exc}",
         ) from exc
 
 

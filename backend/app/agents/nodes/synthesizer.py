@@ -58,11 +58,71 @@ def response_synthesizer_node(state: AgentState) -> AgentState:
         state["quick_replies"] = ["Emergency Return Course", "Nearest Safe Harbor", "Mute Alarm"]
         return state
 
-    # 2. Normal Safe Case
+    # 2. Normal Case - Differentiate Weather/Location inquiry vs Composite Advisory
     w_data = state.get("weather_data") or {}
     wave = w_data.get("wave_height_m", 1.3)
+    swell = w_data.get("swell_wave_height_m", 1.1)
     wind = w_data.get("wind_speed_knots", 12.5)
+    wave_dir = w_data.get("wave_direction_deg", 135.0)
+    wind_dir = w_data.get("wind_direction_deg", 120.0)
+    temp = w_data.get("sea_surface_temp_celsius", 28.6)
+    is_safe = w_data.get("is_safe_for_small_craft", True)
+    loc_name = state.get("target_location_name")
 
+    raw_query = (state.get("raw_query") or "").lower()
+    trans_query = (state.get("translated_query") or "").lower()
+    combined_q = f"{raw_query} {trans_query}"
+
+    is_weather_specific = (
+        loc_name is not None
+        or (
+            any(kw in combined_q for kw in ["weather", "wave", "wind", "swell", "sea", "வானிலை", "அலை", "காற்று", "मौसम", "हवा", "लहर"])
+            and not any(kw in combined_q for kw in ["pfz", "fish", "மீன்", "मछली", "border", "எல்லை", "सीमा"])
+        )
+    )
+
+    if is_weather_specific:
+        area_en = f"{loc_name} Marine Sector" if loc_name else "Current Coastal Sector"
+        safety_en = "Sea state calm and safe for small craft operations." if is_safe else "Rough sea advisory! Exercise caution."
+        en_text = (
+            f"{area_en} Advisory: Significant wave height {wave:.1f}m (Swell: {swell:.1f}m, bearing {wave_dir:.0f}°), "
+            f"wind speed {wind:.1f} kts ({wind_dir:.0f}°). Sea temp {temp:.1f}°C. {safety_en}"
+        )
+
+        weather_loc_map = {
+            "ta": (
+                f"{loc_name or 'கடல்'} நேரடி வானிலை: அலை உயரம் {wave:.1f}மீ (சுழல் அலை: {swell:.1f}மீ), "
+                f"காற்று {wind:.1f} நாட்ஸ். கடல் வெப்பநிலை {temp:.1f}°C. "
+                f"{'கடல் அமைதியாகவும் பாதுகாப்பாகவும் உள்ளது.' if is_safe else 'கடல் கொந்தளிப்பாக உள்ளது, எச்சரிக்கை!'}"
+            ),
+            "hi": (
+                f"{loc_name or 'तटीय क्षेत्र'} समुद्री मौसम: लहरों की ऊंचाई {wave:.1f} मीटर (उछाल: {swell:.1f} मीटर), "
+                f"हवा {wind:.1f} समुद्री मील है। समुद्र तापमान {temp:.1f}°C। "
+                f"{'समुद्र शांत और नौकाओं के लिए सुरक्षित है।' if is_safe else 'समुद्र अशांत है, सावधानी बरतें।'}"
+            ),
+            "te": (
+                f"{loc_name or 'తీర'} సముద్ర వాతావరణం: అలల ఎత్తు {wave:.1f} మీ (ఉప్పెన {swell:.1f} మీ), "
+                f"గాలి {wind:.1f} నాట్స్. సముద్ర ఉష్ణోగ్రత {temp:.1f}°C. "
+                f"{'సముద్రం ప్రశాంతంగా ఉంది, సురక్షితం.' if is_safe else 'సముద్రం ఉధృతంగా ఉంది, జాగ్రత్త!'}"
+            ),
+            "bn": (
+                f"{loc_name or 'উপকূলীয়'} আবহাওয়া রিপোর্ট: ঢেউয়ের উচ্চতা {wave:.1f} মিটার, বাতাস {wind:.1f} নট। "
+                f"তাপমাত্রা {temp:.1f}°C। {'সমুদ্র শান্ত এবং নিরাপদ।' if is_safe else 'সমুদ্র উত্তাল, সতর্ক থাকুন।'}"
+            ),
+            "gu": (
+                f"{loc_name or 'દરિયાઈ'} હવામાન: મોજાંની ઊંચાઈ {wave:.1f} મીટર, પવન {wind:.1f} નોટ્સ. "
+                f"તાપમાન {temp:.1f}°C. {'દરિયો શાંત અને સલામત છે.' if is_safe else 'દરિયો તોફાની છે, સાવધાન રહો.'}"
+            ),
+            "en": en_text,
+        }
+
+        loc_text = weather_loc_map.get(lang, en_text)
+        state["english_response"] = en_text
+        state["localized_response"] = loc_text
+        state["quick_replies"] = ["Hourly Swell Forecast", "Nearest PFZ Zone", "Check Border Distance"]
+        return state
+
+    # 3. Composite Safe Case (Default)
     pfz_list = state.get("pfz_features") or []
     if pfz_list:
         top_pfz = pfz_list[0]

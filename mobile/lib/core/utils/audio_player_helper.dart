@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Helper wrapper around audioplayers package for playing synthetic voice advisories,
 /// TTS responses, and in-memory synthesized emergency sirens in the ORCA Mobile App.
@@ -19,6 +21,32 @@ class AudioPlayerHelper {
     _player.onPlayerStateChanged.listen((state) {
       _isPlaying = (state == PlayerState.playing);
     });
+    _configureAudioContext();
+  }
+
+  Future<void> _configureAudioContext() async {
+    try {
+      await _player.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            stayAwake: true,
+            contentType: AndroidContentType.speech,
+            usageType: AndroidUsageType.media,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playAndRecord,
+            options: const {
+              AVAudioSessionOptions.defaultToSpeaker,
+            },
+          ),
+        ),
+      );
+      await _player.setVolume(1.0);
+    } catch (e) {
+      debugPrint('[AudioPlayerHelper] _configureAudioContext error: $e');
+    }
   }
 
   /// Synthesize an authentic marine emergency siren / buzzer waveform in memory
@@ -81,6 +109,7 @@ class AudioPlayerHelper {
     if (_isEmergencyBuzzerActive) return;
     try {
       _isEmergencyBuzzerActive = true;
+      await _configureAudioContext();
       final sirenBytes = generateEmergencySirenWav();
       await _player.setReleaseMode(ReleaseMode.loop);
       await _player.stop();
@@ -108,6 +137,20 @@ class AudioPlayerHelper {
       final bytes = base64Decode(clean);
       await _player.stop();
       await _player.setReleaseMode(ReleaseMode.release);
+      await _configureAudioContext();
+
+      if (!kIsWeb) {
+        try {
+          final tempDir = await getTemporaryDirectory();
+          final tempFile = File('${tempDir.path}/bhashini_tts_${DateTime.now().millisecondsSinceEpoch}.wav');
+          await tempFile.writeAsBytes(bytes, flush: true);
+          await _player.play(DeviceFileSource(tempFile.path));
+          return;
+        } catch (e) {
+          debugPrint('[AudioPlayerHelper] DeviceFileSource fallback: $e');
+        }
+      }
+
       await _player.play(BytesSource(bytes));
     } catch (e) {
       debugPrint('[AudioPlayerHelper] playBytesBase64 error: $e');
@@ -119,6 +162,20 @@ class AudioPlayerHelper {
     try {
       await _player.stop();
       await _player.setReleaseMode(ReleaseMode.release);
+      await _configureAudioContext();
+
+      if (!kIsWeb) {
+        try {
+          final tempDir = await getTemporaryDirectory();
+          final tempFile = File('${tempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.wav');
+          await tempFile.writeAsBytes(bytes, flush: true);
+          await _player.play(DeviceFileSource(tempFile.path));
+          return;
+        } catch (e) {
+          debugPrint('[AudioPlayerHelper] DeviceFileSource fallback: $e');
+        }
+      }
+
       await _player.play(BytesSource(bytes));
     } catch (e) {
       debugPrint('[AudioPlayerHelper] playBytes error: $e');

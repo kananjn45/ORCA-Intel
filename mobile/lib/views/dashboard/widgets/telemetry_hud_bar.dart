@@ -12,10 +12,17 @@ class TelemetryHudBar extends StatelessWidget {
   final VoidCallback? onSimulateTap;
   final String currentLanguage;
 
+  final bool isLiveCruising;
+  final bool isLiveGpsActive;
+  final VoidCallback? onCruiseToggleTap;
+
   const TelemetryHudBar({
     super.key,
     required this.telemetry,
     required this.geofence,
+    this.isLiveCruising = true,
+    this.isLiveGpsActive = false,
+    this.onCruiseToggleTap,
     this.onLanguageTap,
     this.onOfflinePackTap,
     this.onImblTap,
@@ -103,10 +110,61 @@ class TelemetryHudBar extends StatelessWidget {
                     ],
                   ),
 
-                  // Actions: Test, Offline Pack & Language
+                  // Actions: Cruise Status, Test, Offline Pack & Language
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Cruise / GPS Live Indicator Pill
+                      InkWell(
+                        onTap: onCruiseToggleTap ?? onSimulateTap,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isLiveGpsActive
+                                ? AppColors.electricCyan.withOpacity(0.2)
+                                : (isLiveCruising ? AppColors.bioGreen.withOpacity(0.18) : AppColors.hazardAmber.withOpacity(0.18)),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isLiveGpsActive
+                                  ? AppColors.electricCyan.withOpacity(0.7)
+                                  : (isLiveCruising ? AppColors.bioGreen.withOpacity(0.7) : AppColors.hazardAmber.withOpacity(0.7)),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: isLiveGpsActive
+                                      ? AppColors.electricCyan
+                                      : (isLiveCruising ? AppColors.bioGreen : AppColors.hazardAmber),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                isLiveGpsActive
+                                    ? 'GPS LIVE'
+                                    : (isLiveCruising ? 'CRUISING' : 'PAUSED'),
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w900,
+                                  color: isLiveGpsActive
+                                      ? AppColors.electricCyan
+                                      : (isLiveCruising ? AppColors.bioGreen : AppColors.hazardAmber),
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 5),
+
                       // Test Scenario Simulator Button
                       InkWell(
                         onTap: onSimulateTap,
@@ -209,34 +267,42 @@ class TelemetryHudBar extends StatelessWidget {
                   // GPS Coordinates
                   Expanded(
                     flex: 11,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.cardSurfaceLight,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.navyDark),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.my_location_rounded, size: 12, color: AppColors.primaryBlue),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                '${telemetry.latitude.toStringAsFixed(3)}°N  ${telemetry.longitude.toStringAsFixed(3)}°E',
-                                style: const TextStyle(
-                                  fontSize: 10.5,
-                                  fontFamily: 'monospace',
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.iceWhite,
-                                  letterSpacing: 0.2,
+                    child: InkWell(
+                      onTap: onSimulateTap,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardSurfaceLight,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.navyDark),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isLiveGpsActive ? Icons.gps_fixed_rounded : Icons.my_location_rounded,
+                              size: 12,
+                              color: isLiveGpsActive ? AppColors.electricCyan : AppColors.primaryBlue,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  '${telemetry.latitude.toStringAsFixed(4)}°N  ${telemetry.longitude.toStringAsFixed(4)}°E',
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.iceWhite,
+                                    letterSpacing: 0.2,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

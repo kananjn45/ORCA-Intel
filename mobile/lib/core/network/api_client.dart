@@ -12,9 +12,9 @@ class ApiClient {
     dio = Dio(
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
-        connectTimeout: const Duration(seconds: 4),
-        receiveTimeout: const Duration(seconds: 4),
-        sendTimeout: const Duration(seconds: 4),
+        connectTimeout: const Duration(seconds: 6),
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 15),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -31,9 +31,15 @@ class ApiClient {
               (error.type == DioExceptionType.connectionError ||
                   error.type == DioExceptionType.connectionTimeout)) {
             final currentBase = dio.options.baseUrl;
-            final fallbackBase = currentBase.contains('10.0.2.2')
-                ? 'http://127.0.0.1:8000'
-                : 'http://10.0.2.2:8000';
+            final fallbackBases = [
+              'http://127.0.0.1:8000',
+              'http://192.168.0.107:8000',
+              'http://10.0.2.2:8000',
+            ];
+            final fallbackBase = fallbackBases.firstWhere(
+              (b) => b != currentBase,
+              orElse: () => 'http://127.0.0.1:8000',
+            );
 
             try {
               final opts = error.requestOptions;

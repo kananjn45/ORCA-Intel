@@ -77,6 +77,23 @@ class MarineWeatherMetric(BaseModel):
     source: str = Field(default="open-meteo")
 
 
+class CycloneHazardMetric(BaseModel):
+    detected: bool = Field(default=False, description="True if storm, squall, or cyclonic system is detected")
+    hazard_category: str = Field(default="Favourable Sea State", description="IMD Classification: Cyclonic Storm, Deep Depression, Monsoon Low, etc.")
+    center_latitude: float = Field(..., description="Latitude of detected live storm/low-pressure center")
+    center_longitude: float = Field(..., description="Longitude of detected live storm/low-pressure center")
+    radius_km: float = Field(default=15.0, description="Estimated danger radius of the cyclonic wind/wave field in km")
+    surface_pressure_hpa: float = Field(default=1012.0, description="Minimum central surface pressure in hPa from Open-Meteo")
+    max_wind_speed_knots: float = Field(default=10.0, description="Maximum sustained wind speed in knots")
+    max_wind_gusts_knots: float = Field(default=15.0, description="Peak wind gusts in knots")
+    max_wave_height_m: float = Field(default=1.0, description="Peak significant wave height in meters")
+    distance_to_vessel_km: float = Field(default=0.0, description="Distance from current vessel coordinates to storm center")
+    bearing_to_center_deg: float = Field(default=0.0, description="Compass bearing from vessel to storm center")
+    advisory: str = Field(default="Normal sea state", description="Tactical navigational advisory")
+    source: str = Field(default="open-meteo-live", description="Source of meteorological data")
+    observed_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # 3. Potential Fishing Zone (PFZ) Models
 
 class PFZFeature(BaseModel):

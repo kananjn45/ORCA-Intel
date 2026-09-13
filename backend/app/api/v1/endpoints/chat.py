@@ -17,6 +17,24 @@ from app.agents.state import AgentState
 router = APIRouter()
 
 
+def _clean_tts_text(text: str, language: str) -> str:
+    """Normalize symbols and technical units for natural, low-latency Bhashini speech synthesis."""
+    if not text:
+        return ""
+    cleaned = text
+    cleaned = cleaned.replace("°C", " degrees Celsius" if language == "en" else " டிகிரி செல்சியஸ்")
+    cleaned = cleaned.replace("°", " degrees" if language == "en" else " டிகிரி")
+    cleaned = cleaned.replace("kts", " knots" if language == "en" else " நாட்ஸ்")
+    cleaned = cleaned.replace("km/h", " kilometers per hour")
+    cleaned = cleaned.replace("m/s", " meters per second")
+    for ch in ["*", "#", "_", "`", "(", ")", "[", "]", "{", "}"]:
+        cleaned = cleaned.replace(ch, " ")
+    cleaned = " ".join(cleaned.split())
+    if len(cleaned) > 280:
+        cleaned = cleaned[:280].rsplit(".", 1)[0] + "."
+    return cleaned
+
+
 @router.post("/message", response_model=ChatQueryResponse, summary="Multi-Agent conversational advisory (LangGraph + Guardrails)")
 async def post_chat_message(request: ChatQueryRequest) -> ChatQueryResponse:
     lat = request.telemetry.latitude
@@ -24,11 +42,24 @@ async def post_chat_message(request: ChatQueryRequest) -> ChatQueryResponse:
     query_text = request.user_query_text or "Check marine safety and fishing zones"
     source_lang = request.source_language or "en"
 
-    # 1. Fetch live ocean data from Open-Meteo & INCOIS
-    weather = await open_meteo.get_marine_weather(lat, lon)
-    pfzs = await incois_pfz.get_pfz_features(lat, lon, radius_km=50.0)
+    # 1. Detect if captain mentioned a specific coastal sector/port (e.g., Mumbai, Goa, Kochi, Chennai)
+    query_lower = query_text.lower()
+    from app.agents.nodes.intent_classifier import COASTAL_LOCATIONS
+    target_loc = None
+    for loc_key, loc_info in COASTAL_LOCATIONS.items():
+        if loc_key in query_lower:
+            target_loc = loc_info
+            break
 
-    # 2. Construct LangGraph initial state
+    target_name = target_loc["name"] if target_loc else None
+    query_lat = target_loc["lat"] if target_loc else lat
+    query_lon = target_loc["lon"] if target_loc else lon
+
+    # 2. Fetch live ocean data from Open-Meteo & INCOIS for relevant coordinates
+    weather = await open_meteo.get_marine_weather(query_lat, query_lon)
+    pfzs = await incois_pfz.get_pfz_features(query_lat, query_lon, radius_km=50.0)
+
+    # 3. Construct LangGraph initial state
     agent_state: AgentState = {
         "session_id": request.session_id,
         "raw_query": query_text,
@@ -40,7 +71,9 @@ async def post_chat_message(request: ChatQueryRequest) -> ChatQueryResponse:
         "vessel_heading_deg": request.telemetry.heading_deg,
         "timestamp": request.telemetry.timestamp.isoformat(),
         "intents": [],
-        "target_destination": None,
+        "target_destination": {"lat": query_lat, "lon": query_lon} if target_loc else None,
+        "target_location_name": target_name,
+        "use_live_weather": True,
         "weather_data": weather.model_dump(mode="json") if weather else None,
         "pfz_features": [p.model_dump(mode="json") for p in pfzs[:3]] if pfzs else None,
         "boundary_metrics": None,
@@ -90,13 +123,33 @@ async def post_chat_message(request: ChatQueryRequest) -> ChatQueryResponse:
         evasive_heading_deg=b_metrics.get("evasive_heading_deg"),
     )
 
+    # Synthesize spoken voice response for instantaneous playback
+    audio_b64 = None
+    try:
+        from app.services.bhashini import BhashiniService
+        from app.core.config import settings
+        bhashini = BhashiniService(settings=settings)
+        tts_lang = source_lang if source_lang in ["ta", "hi", "te", "bn", "gu", "kn", "ml", "mr", "or", "pa", "en"] else "en"
+        raw_speech_text = response_loc if tts_lang != "en" and response_loc else response_en
+        clean_speech = _clean_tts_text(raw_speech_text, tts_lang)
+        if clean_speech:
+            tts_res = await bhashini.synthesise_speech(
+                text=clean_speech,
+                language_code=tts_lang,
+                gender="female",
+            )
+            if tts_res and tts_res.audio_content:
+                audio_b64 = tts_res.audio_content
+    except Exception as exc:
+        pass
+
     return ChatQueryResponse(
         session_id=request.session_id,
         transcribed_text=request.user_query_text,
         translated_query_en=query_text,
         response_text_en=response_en,
         response_text_localized=response_loc,
-        audio_base64_localized=None,
+        audio_base64_localized=audio_b64,
         guardrail_report=GuardrailValidationReport(
             passed=guardrail_passed,
             checks_evaluated=["weather_limits", "imbl_proximity", "symbolic_verifier"],

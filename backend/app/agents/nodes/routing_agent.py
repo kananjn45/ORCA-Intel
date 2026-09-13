@@ -73,32 +73,35 @@ def routing_agent_node(state: AgentState) -> AgentState:
     waypoints: List[List[float]] = []
     total_dist_km = round(haversine_km(vessel_lat, vessel_lon, t_lat, t_lon), 2)
 
-    try:
-        # Construct 2D navigable water grid (0.01° ~ 1.1 km resolution)
-        grid = MarineGrid(min_lat, max_lat, min_lon, max_lon, resolution_deg=0.01)
+    # Execute high-resolution A* rasterization for tactical voyages within 60 km;
+    # for regional cross-coast distances, use fast geodesic interpolation.
+    if total_dist_km <= 60.0:
+        try:
+            # Construct 2D navigable water grid (0.01° ~ 1.1 km resolution)
+            grid = MarineGrid(min_lat, max_lat, min_lon, max_lon, resolution_deg=0.01)
 
-        # Rasterize coastline landmass obstacles using Shapely shapes directly
-        obstacles = _get_coastline_obstacles()
-        for geom in obstacles:
-            grid.rasterize_obstacles(geom)
+            # Rasterize coastline landmass obstacles using Shapely shapes directly
+            obstacles = _get_coastline_obstacles()
+            for geom in obstacles:
+                grid.rasterize_obstacles(geom)
 
-        start_node = grid.coord_to_node(vessel_lat, vessel_lon)
-        goal_node = grid.coord_to_node(t_lat, t_lon)
+            start_node = grid.coord_to_node(vessel_lat, vessel_lon)
+            goal_node = grid.coord_to_node(t_lat, t_lon)
 
-        # Clear start and goal if marked by bounding edge
-        grid.unblock(start_node)
-        grid.unblock(goal_node)
+            # Clear start and goal if marked by bounding edge
+            grid.unblock(start_node)
+            grid.unblock(goal_node)
 
-        # Execute Dev 1's A* pathfinding
-        node_path = astar(grid, start_node, goal_node)
+            # Execute Dev 1's A* pathfinding
+            node_path = astar(grid, start_node, goal_node)
 
-        if node_path:
-            geojson_data = path_to_geojson(grid, node_path)
-            waypoints = geojson_data["geometry"]["coordinates"]
-            total_dist_km = round(grid.path_length_km(node_path), 2)
-    except Exception:
-        # Fallback to direct safe geodesic interpolation
-        pass
+            if node_path:
+                geojson_data = path_to_geojson(grid, node_path)
+                waypoints = geojson_data["geometry"]["coordinates"]
+                total_dist_km = round(grid.path_length_km(node_path), 2)
+        except Exception:
+            # Fallback to direct safe geodesic interpolation
+            pass
 
     if not waypoints:
         mid_lat = round((vessel_lat + t_lat) / 2.0, 4)

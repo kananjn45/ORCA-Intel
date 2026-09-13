@@ -43,8 +43,10 @@ class Settings(BaseSettings):
     # Bhashini Multilingual Speech API (Fallback)
     BHASHINI_USER_ID: str = ""
     BHASHINI_API_KEY: str = ""
+    BHASHINI_UDYAT_KEY: str = ""
+    BHASHINI_INFERENCE_KEY: str = ""
     BHASHINI_PIPELINE_ENDPOINT: str = "https://dhruva-api.bhashini.gov.in/services/inference/pipeline"
-    BHASHINI_USE_MOCK: bool = True
+    BHASHINI_USE_MOCK: bool = False
 
     # Dev 4 Voice Pipeline Settings (Dhruva/ULCA + TTS Cache)
     bhashini_api_key: str = ""
@@ -123,11 +125,33 @@ class Settings(BaseSettings):
         return self.google_mock_mode or not self.is_google_configured
 
     @property
+    def resolved_bhashini_user_id(self) -> str:
+        """Resolve Bhashini User ID."""
+        return (self.bhashini_user_id or self.BHASHINI_USER_ID or "").strip()
+
+    @property
+    def resolved_bhashini_udyat_key(self) -> str:
+        """Resolve Bhashini Udyat / ULCA API key."""
+        return (
+            self.bhashini_api_key
+            or self.BHASHINI_UDYAT_KEY
+            or self.BHASHINI_API_KEY
+            or ""
+        ).strip()
+
+    @property
+    def resolved_bhashini_inference_key(self) -> str:
+        """Resolve Bhashini Inference / Authorization key."""
+        return (
+            self.BHASHINI_INFERENCE_KEY
+            or self.resolved_bhashini_udyat_key
+        ).strip()
+
+    @property
     def bhashini_configured(self) -> bool:
         """Return True if real Bhashini credentials are available."""
-        key = (self.bhashini_api_key or self.BHASHINI_API_KEY).strip()
-        uid = (self.bhashini_user_id or self.BHASHINI_USER_ID).strip()
-        return bool(key and uid and not key.lower().startswith(("placeholder", "your_")))
+        key = self.resolved_bhashini_inference_key or self.resolved_bhashini_udyat_key
+        return bool(key and not key.lower().startswith(("placeholder", "your_")))
 
     @property
     def use_bhashini_mock(self) -> bool:

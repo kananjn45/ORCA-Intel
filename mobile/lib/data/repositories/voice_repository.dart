@@ -28,7 +28,11 @@ class VoiceRepository {
       final response = await _apiClient.post(
         '/api/v1/voice/transcribe',
         data: formData,
-        options: Options(contentType: 'multipart/form-data'),
+        options: Options(
+          contentType: 'multipart/form-data',
+          receiveTimeout: const Duration(seconds: 35),
+          sendTimeout: const Duration(seconds: 35),
+        ),
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -55,7 +59,11 @@ class VoiceRepository {
           'language': languageCode,
           'gender': gender,
         }),
-        options: Options(contentType: 'multipart/form-data'),
+        options: Options(
+          contentType: 'multipart/form-data',
+          receiveTimeout: const Duration(seconds: 35),
+          sendTimeout: const Duration(seconds: 35),
+        ),
       );
 
       if (response.statusCode == 200 && response.data != null) {

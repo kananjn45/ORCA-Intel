@@ -52,15 +52,62 @@ class AppColors {
   static const Color glassDanger = Color(0x33FF7068);
 
   // ============================================================================
+  // Stitch: ORCA Marine AI Interface Design System Tokens
+  // ============================================================================
+  static const Color stitchSurface = Color(0xFFF8F9FF);
+  static const Color stitchSurfaceDim = Color(0xFFC4DCFF);
+  static const Color stitchSurfaceBright = Color(0xFFF8F9FF);
+  static const Color stitchSurfaceContainerLowest = Color(0xFFFFFFFF);
+  static const Color stitchSurfaceContainerLow = Color(0xFFEFF4FF);
+  static const Color stitchSurfaceContainer = Color(0xFFE5EEFF);
+  static const Color stitchSurfaceContainerHigh = Color(0xFFDCE9FF);
+  static const Color stitchSurfaceContainerHighest = Color(0xFFD2E4FF);
+
+  static const Color stitchPrimary = Color(0xFF00647C);         // Deep Ocean Teal
+  static const Color stitchOnPrimary = Color(0xFFFFFFFF);
+  static const Color stitchPrimaryContainer = Color(0xFF007F9D);
+  static const Color stitchOnPrimaryContainer = Color(0xFFFAFDFF);
+  static const Color stitchPrimaryFixed = Color(0xFFB7EAFF);
+  static const Color stitchPrimaryFixedDim = Color(0xFF6CD3F7);
+  static const Color stitchOnPrimaryFixed = Color(0xFF001F28);
+
+  static const Color stitchSecondary = Color(0xFF006C4A);       // Emerald Coastal
+  static const Color stitchOnSecondary = Color(0xFFFFFFFF);
+  static const Color stitchSecondaryContainer = Color(0xFF82F5C1);
+  static const Color stitchOnSecondaryContainer = Color(0xFF00714E);
+  static const Color stitchSecondaryFixed = Color(0xFF85F8C4);
+  static const Color stitchSecondaryFixedDim = Color(0xFF68DBA9);
+  static const Color stitchOnSecondaryFixed = Color(0xFF002114);
+
+  static const Color stitchTertiary = Color(0xFF8D4B00);        // Amber Advisory
+  static const Color stitchOnTertiary = Color(0xFFFFFFFF);
+  static const Color stitchTertiaryContainer = Color(0xFFB15F00);
+  static const Color stitchOnTertiaryContainer = Color(0xFFFFFBFF);
+  static const Color stitchTertiaryFixed = Color(0xFFFFDCC3);
+  static const Color stitchTertiaryFixedDim = Color(0xFFFFB77D);
+  static const Color stitchOnTertiaryFixed = Color(0xFF2F1500);
+
+  static const Color stitchError = Color(0xFFBA1A1A);           // IMBL Coral Alert Red
+  static const Color stitchOnError = Color(0xFFFFFFFF);
+  static const Color stitchErrorContainer = Color(0xFFFFDAD6);
+  static const Color stitchOnErrorContainer = Color(0xFF93000A);
+
+  static const Color stitchOnSurface = Color(0xFF001C37);       // Deep Oceanic Navy text
+  static const Color stitchOnSurfaceVariant = Color(0xFF3E484D);// Muted slate text
+  static const Color stitchOutline = Color(0xFF6E797E);
+  static const Color stitchOutlineVariant = Color(0xFFBDC8CE);  // Subtle structural border
+
+  // ============================================================================
   // Sunlight Deck Mode
   // ============================================================================
-  static const Color sunlightBg = Color(0xFFFFFFFF);
-  static const Color sunlightSurface = Color(0xFFF1F5F9);
-  static const Color sunlightBorder = Color(0xFFCBD5E1);
-  static const Color sunlightTextPrimary = Color(0xFF020617);
-  static const Color sunlightTextSecondary = Color(0xFF334155);
-  static const Color sunlightCyan = electricCyan;
-  static const Color sunlightGreen = Color(0xFF15803D);
-  static const Color sunlightAmber = Color(0xFFB45309);
-  static const Color sunlightRed = Color(0xFFBE123C);
+  static const Color sunlightBg = stitchSurface;
+  static const Color sunlightSurface = stitchSurfaceContainerLowest;
+  static const Color sunlightBorder = stitchOutlineVariant;
+  static const Color sunlightTextPrimary = stitchOnSurface;
+  static const Color sunlightTextSecondary = stitchOnSurfaceVariant;
+  static const Color sunlightCyan = stitchPrimary;
+  static const Color sunlightGreen = stitchSecondary;
+  static const Color sunlightAmber = stitchTertiary;
+  static const Color sunlightRed = stitchError;
 }
+

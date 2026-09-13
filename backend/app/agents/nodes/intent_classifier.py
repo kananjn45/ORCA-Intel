@@ -30,15 +30,77 @@ INTENT_KEYWORD_MAP = {
     ]
 }
 
+COASTAL_LOCATIONS = {
+    "mumbai": {"name": "Mumbai", "lat": 18.95, "lon": 72.82},
+    "bombay": {"name": "Mumbai", "lat": 18.95, "lon": 72.82},
+    "மும்பை": {"name": "Mumbai", "lat": 18.95, "lon": 72.82},
+    "मुंबई": {"name": "Mumbai", "lat": 18.95, "lon": 72.82},
+
+    "chennai": {"name": "Chennai", "lat": 13.08, "lon": 80.27},
+    "madras": {"name": "Chennai", "lat": 13.08, "lon": 80.27},
+    "சென்னை": {"name": "Chennai", "lat": 13.08, "lon": 80.27},
+    "चेन्नई": {"name": "Chennai", "lat": 13.08, "lon": 80.27},
+
+    "rameswaram": {"name": "Rameswaram", "lat": 9.28, "lon": 79.31},
+    "palk": {"name": "Palk Bay", "lat": 9.28, "lon": 79.31},
+    "ராமேஸ்வரம்": {"name": "Rameswaram", "lat": 9.28, "lon": 79.31},
+    "रामेश्वरम": {"name": "Rameswaram", "lat": 9.28, "lon": 79.31},
+
+    "kochi": {"name": "Kochi", "lat": 9.96, "lon": 76.24},
+    "cochin": {"name": "Kochi", "lat": 9.96, "lon": 76.24},
+    "கொச்சி": {"name": "Kochi", "lat": 9.96, "lon": 76.24},
+    "कोच्चि": {"name": "Kochi", "lat": 9.96, "lon": 76.24},
+
+    "goa": {"name": "Goa", "lat": 15.40, "lon": 73.80},
+    "mormugao": {"name": "Goa", "lat": 15.40, "lon": 73.80},
+    "கோவா": {"name": "Goa", "lat": 15.40, "lon": 73.80},
+    "गोवा": {"name": "Goa", "lat": 15.40, "lon": 73.80},
+
+    "visakhapatnam": {"name": "Visakhapatnam", "lat": 17.68, "lon": 83.21},
+    "vizag": {"name": "Visakhapatnam", "lat": 17.68, "lon": 83.21},
+    "விசாகப்பட்டினம்": {"name": "Visakhapatnam", "lat": 17.68, "lon": 83.21},
+    "विशाखापत्तनम": {"name": "Visakhapatnam", "lat": 17.68, "lon": 83.21},
+
+    "porbandar": {"name": "Porbandar", "lat": 21.64, "lon": 69.60},
+    "gujarat": {"name": "Gujarat Coast", "lat": 21.64, "lon": 69.60},
+    "போர்பந்தர்": {"name": "Porbandar", "lat": 21.64, "lon": 69.60},
+    "पोरबंदर": {"name": "Porbandar", "lat": 21.64, "lon": 69.60},
+
+    "kanyakumari": {"name": "Kanyakumari", "lat": 8.08, "lon": 77.55},
+    "கன்னியாகுமரி": {"name": "Kanyakumari", "lat": 8.08, "lon": 77.55},
+    "कन्याकुमारी": {"name": "Kanyakumari", "lat": 8.08, "lon": 77.55},
+
+    "mangalore": {"name": "Mangalore", "lat": 12.87, "lon": 74.84},
+    "மங்களூரு": {"name": "Mangalore", "lat": 12.87, "lon": 74.84},
+    "मंगलुरु": {"name": "Mangalore", "lat": 12.87, "lon": 74.84},
+
+    "kolkata": {"name": "Kolkata", "lat": 22.06, "lon": 88.06},
+    "haldia": {"name": "Haldia", "lat": 22.06, "lon": 88.06},
+    "கொல்கத்தா": {"name": "Kolkata", "lat": 22.06, "lon": 88.06},
+    "कोलकाता": {"name": "Kolkata", "lat": 22.06, "lon": 88.06},
+
+    "paradip": {"name": "Paradip", "lat": 20.31, "lon": 86.61},
+    "odisha": {"name": "Odisha Coast", "lat": 20.31, "lon": 86.61},
+}
+
 def intent_classifier_node(state: AgentState) -> AgentState:
     """
     Deconstructs user queries (in English or regional dialects) into atomic domain intents.
-    Extracts intents and populates state['intents'].
+    Extracts intents, named coastal location, and target coordinates.
     """
     query_raw = (state.get("raw_query") or "").lower()
     query_trans = (state.get("translated_query") or "").lower()
     combined_text = f"{query_raw} {query_trans}"
 
+    # 1. Location Detection
+    for loc_key, loc_info in COASTAL_LOCATIONS.items():
+        if loc_key in combined_text:
+            state["target_location_name"] = loc_info["name"]
+            if not state.get("target_destination"):
+                state["target_destination"] = {"lat": loc_info["lat"], "lon": loc_info["lon"]}
+            break
+
+    # 2. Intent Classification
     detected_intents: List[str] = []
 
     for intent_name, keywords in INTENT_KEYWORD_MAP.items():

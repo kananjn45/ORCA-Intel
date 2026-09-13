@@ -149,17 +149,21 @@ class VoiceChatProvider extends ChangeNotifier {
       );
       _messages.add(agentReply);
 
-      // Synthesize spoken voice reply
-      final audioBase64 = await _voiceRepo.synthesizeSpeech(
-        text: agentReply.textLocalized,
-        languageCode: _selectedLanguage,
-      );
+      // Use audio already synthesized by backend orchestrator, or fallback synthesize
+      String? audioBase64 = agentReply.audioBase64;
+      if (audioBase64 == null || audioBase64.isEmpty) {
+        audioBase64 = await _voiceRepo.synthesizeSpeech(
+          text: agentReply.textLocalized,
+          languageCode: _selectedLanguage,
+        );
+      }
 
       if (audioBase64 != null && audioBase64.isNotEmpty) {
         _isPlayingAudio = true;
         notifyListeners();
         await _audioPlayer.playBytesBase64(audioBase64);
         _isPlayingAudio = false;
+        notifyListeners();
       }
 
       _isProcessing = false;

@@ -762,12 +762,15 @@ class BhashiniService:
         if not self._settings.bhashini_configured:
             raise BhashiniConfigurationError()
 
-        return {
+        headers: Dict[str, str] = {
             "Content-Type": "application/json",
-            "userID": self._settings.bhashini_user_id,
-            "ulcaApiKey": self._settings.bhashini_api_key,
-            "Authorization": self._settings.bhashini_api_key,
+            "Authorization": self._settings.resolved_bhashini_inference_key,
         }
+        if self._settings.resolved_bhashini_udyat_key:
+            headers["ulcaApiKey"] = self._settings.resolved_bhashini_udyat_key
+        if self._settings.resolved_bhashini_user_id:
+            headers["userID"] = self._settings.resolved_bhashini_user_id
+        return headers
 
 
 # =========================================================================

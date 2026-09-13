@@ -3,6 +3,7 @@ import 'package:orca_mobile/data/models/telemetry_model.dart';
 import 'package:orca_mobile/data/models/geofence_model.dart';
 import 'package:orca_mobile/data/models/chat_message_model.dart';
 import 'package:orca_mobile/data/models/weather_model.dart';
+import 'package:orca_mobile/data/models/coastal_sector.dart';
 
 void main() {
   group('Dev 6 Day 1 & Day 2 Models Test Suite', () {
@@ -89,6 +90,43 @@ void main() {
       expect(model.windSpeedKnots, 22.5);
       expect(model.windDirectionCompass, 'NE');
       expect(model.isSafeForSmallCraft, true);
+    });
+  });
+
+  group('CoastalSector & Offline Sync Navigation Tests', () {
+    test('CoastalSector has 5 maritime zones with coordinates and borders', () {
+      expect(CoastalSector.all.length, 5);
+      final porbandar = CoastalSector.findByName('Gujarat Offshore (Porbandar)');
+      expect(porbandar.name, 'Gujarat Offshore (Porbandar)');
+      expect(porbandar.centerLat, closeTo(21.64, 0.05));
+      expect(porbandar.centerLon, closeTo(69.62, 0.05));
+      expect(porbandar.distanceToBorderKm, greaterThan(20.0));
+
+      final rameswaram = CoastalSector.findByName('Palk Strait (Rameswaram)');
+      expect(rameswaram.centerLat, closeTo(9.28, 0.05));
+      expect(rameswaram.distanceToBorderKm, lessThan(30.0));
+
+      final chennai = CoastalSector.findByName('Coromandel Coast (Chennai)');
+      expect(chennai.centerLat, closeTo(12.80, 0.05));
+
+      final vizag = CoastalSector.findByName('Andhra Coast (Visakhapatnam)');
+      expect(vizag.centerLat, closeTo(17.68, 0.05));
+
+      final mandapam = CoastalSector.findByName('Gulf of Mannar (Mandapam)');
+      expect(mandapam.centerLat, closeTo(9.15, 0.05));
+    });
+
+    test('CoastalSector initial telemetry generation creates correct heading and speed', () {
+      final sector = CoastalSector.findByName('Gujarat Offshore (Porbandar)');
+      final telem = sector.createInitialTelemetry();
+      expect(telem.latitude, sector.centerLat);
+      expect(telem.longitude, sector.centerLon);
+      expect(telem.headingDeg, 290.0);
+      expect(telem.speedKnots, 8.8);
+
+      final geofence = sector.createInitialGeofence();
+      expect(geofence.distanceToImblKm, closeTo(sector.distanceToBorderKm, 0.1));
+      expect(geofence.nearestImblPoint, isNotNull);
     });
   });
 }
