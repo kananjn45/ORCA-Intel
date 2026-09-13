@@ -5,20 +5,18 @@ class ApiEndpoints {
   /// Allows setting a custom backend URL at runtime (e.g., LAN IP http://192.168.0.107:8000)
   static String customBaseUrl = '';
 
-  // In Android Emulator, 10.0.2.2 points to host.
-  // On physical Android devices connected via USB or adb reverse, 127.0.0.1:8000 forwards to host.
-  // For Web or Windows desktop, localhost:8000 is used.
+  // Production Render Cloud Backend
+  static const String defaultProductionUrl = 'https://orca-intel.onrender.com';
+
   static String get baseUrl {
     if (customBaseUrl.isNotEmpty) {
       return customBaseUrl;
     }
-    if (kIsWeb) {
-      return 'http://localhost:8000';
+    const envUrl = String.fromEnvironment('BACKEND_URL');
+    if (envUrl.isNotEmpty) {
+      return envUrl;
     }
-    if (Platform.isAndroid) {
-      return 'http://127.0.0.1:8000';
-    }
-    return 'http://localhost:8000';
+    return defaultProductionUrl;
   }
 
   // REST API Endpoints

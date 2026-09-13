@@ -12,9 +12,9 @@ class ApiClient {
     dio = Dio(
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
-        connectTimeout: const Duration(seconds: 6),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 35),
+        receiveTimeout: const Duration(seconds: 45),
+        sendTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -22,15 +22,20 @@ class ApiClient {
       ),
     );
 
-    // Auto-fallback interceptor: retries ONCE between 10.0.2.2 and 127.0.0.1 without infinite loops
+    // Auto-fallback interceptor: retries ONCE between local dev IPs only (not for cloud URLs)
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (DioException error, ErrorInterceptorHandler handler) async {
+          final currentBase = dio.options.baseUrl;
+          // Never redirect a production cloud URL to local addresses
+          if (currentBase.startsWith('https://')) {
+            return handler.next(error);
+          }
+
           final alreadyRetried = error.requestOptions.extra['has_retried_fallback'] == true;
           if (!alreadyRetried &&
               (error.type == DioExceptionType.connectionError ||
                   error.type == DioExceptionType.connectionTimeout)) {
-            final currentBase = dio.options.baseUrl;
             final fallbackBases = [
               'http://127.0.0.1:8000',
               'http://192.168.0.107:8000',
