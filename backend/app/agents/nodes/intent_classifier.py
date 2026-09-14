@@ -27,10 +27,21 @@ INTENT_KEYWORD_MAP = {
         "பாதை", "வழி", "செல்ல",
         "మార్గం", "దిశ",
         "मार्ग", "रास्ता", "दिशा"
+    ],
+    "port": [
+        "port", "harbor", "harbour", "jetty", "berth", "dock", "haven", "pier", "landing",
+        "துறைமுகம்", "ஹார்பர்", "படகுகுழாம்", "தளவாடம்",
+        "పోర్టు", "రేవు", "హార్బర్", "తీరప్రాంతం",
+        "बंदरगाह", "गोदी", "पत्तन", "हार्बर"
     ]
 }
 
 COASTAL_LOCATIONS = {
+    "hyderabad": {"name": "Hyderabad", "lat": 17.3850, "lon": 78.4867, "is_inland": True},
+    "ஹைதராபாத்": {"name": "Hyderabad", "lat": 17.3850, "lon": 78.4867, "is_inland": True},
+    "హైదరాబాద్": {"name": "Hyderabad", "lat": 17.3850, "lon": 78.4867, "is_inland": True},
+    "हैदराबाद": {"name": "Hyderabad", "lat": 17.3850, "lon": 78.4867, "is_inland": True},
+
     "mumbai": {"name": "Mumbai", "lat": 18.95, "lon": 72.82},
     "bombay": {"name": "Mumbai", "lat": 18.95, "lon": 72.82},
     "மும்பை": {"name": "Mumbai", "lat": 18.95, "lon": 72.82},
@@ -40,6 +51,11 @@ COASTAL_LOCATIONS = {
     "madras": {"name": "Chennai", "lat": 13.08, "lon": 80.27},
     "சென்னை": {"name": "Chennai", "lat": 13.08, "lon": 80.27},
     "चेन्नई": {"name": "Chennai", "lat": 13.08, "lon": 80.27},
+
+    "machilipatnam": {"name": "Machilipatnam", "lat": 16.18, "lon": 81.15},
+    "krishnapatnam": {"name": "Krishnapatnam", "lat": 14.25, "lon": 80.12},
+    "kasimedu": {"name": "Chennai Kasimedu", "lat": 13.12, "lon": 80.29},
+    "ennore": {"name": "Kamarajar Port Ennore", "lat": 13.26, "lon": 80.33},
 
     "rameswaram": {"name": "Rameswaram", "lat": 9.28, "lon": 79.31},
     "palk": {"name": "Palk Bay", "lat": 9.28, "lon": 79.31},
@@ -69,6 +85,9 @@ COASTAL_LOCATIONS = {
     "kanyakumari": {"name": "Kanyakumari", "lat": 8.08, "lon": 77.55},
     "கன்னியாகுமரி": {"name": "Kanyakumari", "lat": 8.08, "lon": 77.55},
     "कन्याकुमारी": {"name": "Kanyakumari", "lat": 8.08, "lon": 77.55},
+
+    "tuticorin": {"name": "Tuticorin", "lat": 8.76, "lon": 78.13},
+    "தூத்துக்குடி": {"name": "Tuticorin", "lat": 8.76, "lon": 78.13},
 
     "mangalore": {"name": "Mangalore", "lat": 12.87, "lon": 74.84},
     "மங்களூரு": {"name": "Mangalore", "lat": 12.87, "lon": 74.84},

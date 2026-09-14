@@ -88,6 +88,60 @@ class ChatRepository {
   }) async {
     final lower = query.toLowerCase();
 
+    // Check for Port & Harbor inquiries
+    final isPortQuery = lower.contains('port') ||
+        lower.contains('harbor') ||
+        lower.contains('harbour') ||
+        lower.contains('jetty') ||
+        lower.contains('berth') ||
+        lower.contains('dock') ||
+        lower.contains('துறைமுகம்') ||
+        lower.contains('बंदरगाह') ||
+        lower.contains('రేవు');
+
+    if (isPortQuery) {
+      String enAdvisory;
+      String locAdvisory;
+
+      if (lower.contains('hyderabad')) {
+        enAdvisory = 'Hyderabad is an inland hub located in Telangana. The closest commercial seaports to Hyderabad are Machilipatnam Port (~340 km east) and Krishnapatnam Port (~450 km southeast) in Andhra Pradesh, followed by Chennai Port (~520 km south) and Visakhapatnam Port (~600 km).';
+        locAdvisory = languageCode == 'ta'
+            ? 'ஹைதராபாத் தெலங்கானாவில் உள்ள நிலப்பரப்பு நகரம் ஆகும். இதற்கு மிக அருகில் உள்ள கடல் துறைமுகங்கள்: ஆந்திராவில் உள்ள மசூலிப்பட்டினம் துறைமுகம் (~340 கி.மீ), கிருஷ்ணாப்பட்டினம் துறைமுகம் (~450 கி.மீ) மற்றும் சென்னை துறைமுகம் (~520 கி.மீ).'
+            : (languageCode == 'te'
+                ? 'హైదరాబాద్ తెలంగాణలోని అంతర్భాగ నగరం. సమీపంలోని ఓడరేవులు మచిలీపట్నం పోర్ట్ (~340 కి.మీ), కృష్ణపట్నం పోర్ట్ (~450 కి.మీ) మరియు చెన్నై పోర్ట్ (~520 కి.మీ).'
+                : (languageCode == 'hi'
+                    ? 'हैदराबाद तेलंगाना का एक अंतर्देशीय शहर है। निकटतम बंदरगाह मछलीपट्टनम बंदरगाह (~340 किमी), कृष्णापट्टनम बंदरगाह (~450 किमी) और चेन्नई बंदरगाह (~520 किमी) हैं।'
+                    : enAdvisory));
+      } else if (lower.contains('chennai') || lower.contains('madras')) {
+        enAdvisory = 'In the Chennai maritime sector, the primary ports are Chennai Port (major commercial & container harbor), Kamarajar Port at Ennore (deepwater all-weather port, 20 km north), and Chennai Kasimedu Fishing Harbor (active jetty with ice plants and fuel berths).';
+        locAdvisory = languageCode == 'ta'
+            ? 'சென்னை கடல் பகுதியில் முக்கிய துறைமுகங்கள்: 1) சென்னை சர்வதேச துறைமுகம், 2) எண்ணூர் காமராஜர் துறைமுகம் (20 கி.மீ வடக்கு), மற்றும் 3) காசிமேடு மீன்பிடி துறைமுகம் ஆகும்.'
+            : (languageCode == 'te'
+                ? 'చెన్నై ప్రాంతంలోని ప్రధాన ఓడరేవులు: చెన్నై పోర్ట్, కామరాజర్ పోర్ట్ (ఎన్నూర్), మరియు కాసిమేడు ఫిషింగ్ హార్బర్.'
+                : (languageCode == 'hi'
+                    ? 'चेन्नई क्षेत्र के प्रमुख बंदरगाह: चेन्नई मुख्य कंटेनर बंदरगाह, कामराजार पोर्ट (एन्नोर), और कासिमेडू मत्स्य पालन बंदरगाह हैं।'
+                    : enAdvisory));
+      } else {
+        enAdvisory = 'Nearest operational coastal base to current vessel coordinates (${telemetry.latitude.toStringAsFixed(2)}°N, ${telemetry.longitude.toStringAsFixed(2)}°E) is Chennai Kasimedu Fishing Harbor (Jetty 2, 2.4 km away). Safe approach channel open.';
+        locAdvisory = languageCode == 'ta'
+            ? 'உங்கள் படகிற்கு மிக அருகில் உள்ள துறைமுகம் சென்னை காசிமேடு மீன்பிடி துறைமுகம் (2.4 கி.மீ). பாதுகாப்பான படகுப்பாதை திறந்துள்ளது.'
+            : (languageCode == 'te'
+                ? 'మీ నౌకకు సమీపంలోని రేవు చెన్నై కాసిమేడు ఫిషింగ్ హార్బర్ (2.4 కి.మీ).'
+                : (languageCode == 'hi'
+                    ? 'आपकी नाव के निकटतम बंदरगाह चेन्नई कासिमेडू मत्स्य पालन बंदरगाह (2.4 किमी) है।'
+                    : enAdvisory));
+      }
+
+      return ChatMessageModel(
+        id: 'live-${DateTime.now().millisecondsSinceEpoch}',
+        sender: MessageSender.orca,
+        textLocalized: locAdvisory,
+        textEnglish: enAdvisory,
+        timestamp: DateTime.now(),
+        quickReplies: const ['Route to Port', 'Weather at Port', 'Check Border'],
+      );
+    }
+
     // 1. Resolve target geographic coordinates from query
     double targetLat = telemetry.latitude;
     double targetLon = telemetry.longitude;

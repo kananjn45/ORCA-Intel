@@ -1,3 +1,4 @@
+import math
 from typing import Dict, Any
 from app.agents.state import AgentState
 
@@ -35,6 +36,33 @@ LOCALIZED_TEMPLATES = {
     }
 }
 
+MAJOR_INDIAN_PORTS = [
+    {"name": "Chennai Kasimedu Fishing Harbor", "state": "Tamil Nadu", "lat": 13.1256, "lon": 80.2974, "type": "Fishing Jetty"},
+    {"name": "Chennai Port", "state": "Tamil Nadu", "lat": 13.0850, "lon": 80.2950, "type": "Major Commercial Port"},
+    {"name": "Kamarajar Port (Ennore)", "state": "Tamil Nadu", "lat": 13.2600, "lon": 80.3300, "type": "Commercial Deepwater"},
+    {"name": "Rameswaram Fishing Harbor", "state": "Tamil Nadu", "lat": 9.2881, "lon": 79.3129, "type": "Fishing Harbor"},
+    {"name": "Dhanushkodi Pier", "state": "Tamil Nadu", "lat": 9.1764, "lon": 79.4182, "type": "Coastal Pier"},
+    {"name": "Tuticorin (V.O.C.) Port", "state": "Tamil Nadu", "lat": 8.7642, "lon": 78.1348, "type": "Major Port"},
+    {"name": "Nagapattinam Harbor", "state": "Tamil Nadu", "lat": 10.7672, "lon": 79.8428, "type": "Intermediate Port"},
+    {"name": "Kanyakumari Harbor", "state": "Tamil Nadu", "lat": 8.0883, "lon": 77.5385, "type": "Coastal Harbor"},
+    {"name": "Machilipatnam Port", "state": "Andhra Pradesh", "lat": 16.1800, "lon": 81.1500, "type": "Commercial Harbor"},
+    {"name": "Krishnapatnam Port", "state": "Andhra Pradesh", "lat": 14.2500, "lon": 80.1200, "type": "Deepwater Port"},
+    {"name": "Visakhapatnam Port", "state": "Andhra Pradesh", "lat": 17.6975, "lon": 83.2981, "type": "Major Naval & Cargo Port"},
+    {"name": "Paradeep Port", "state": "Odisha", "lat": 20.2644, "lon": 86.6710, "type": "Major Deepwater Port"},
+    {"name": "Kochi (Cochin) Harbor", "state": "Kerala", "lat": 9.9312, "lon": 76.2673, "type": "Major Port"},
+    {"name": "Mangalore Old Port", "state": "Karnataka", "lat": 12.8617, "lon": 74.8354, "type": "Major Port"},
+    {"name": "Mormugao Port (Goa)", "state": "Goa", "lat": 15.4100, "lon": 73.8000, "type": "Major Harbor"},
+    {"name": "Mumbai Port & JNPT", "state": "Maharashtra", "lat": 18.9500, "lon": 72.8200, "type": "Major International Port"},
+    {"name": "Porbandar Harbor", "state": "Gujarat", "lat": 21.6417, "lon": 69.6293, "type": "All-Weather Harbor"},
+]
+
+def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    r = 6371.0
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2.0) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2.0) ** 2
+    return 2.0 * r * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+
 def response_synthesizer_node(state: AgentState) -> AgentState:
     """
     Synthesizes concise, actionable marine advice in English and user's chosen regional language.
@@ -58,7 +86,69 @@ def response_synthesizer_node(state: AgentState) -> AgentState:
         state["quick_replies"] = ["Emergency Return Course", "Nearest Safe Harbor", "Mute Alarm"]
         return state
 
-    # 2. Normal Case - Differentiate Weather/Location inquiry vs Composite Advisory
+    # 2. Check Port & Harbor Inquiries
+    raw_query = (state.get("raw_query") or "").lower()
+    trans_query = (state.get("translated_query") or "").lower()
+    combined_q = f"{raw_query} {trans_query}"
+
+    is_port_inquiry = (
+        "port" in state.get("intents", [])
+        or any(kw in combined_q for kw in ["port", "harbor", "harbour", "jetty", "berth", "dock", "துறைமுகம்", "ஹார்பர்", "बंदरगाह", "రేవు"])
+    )
+
+    if is_port_inquiry:
+        v_lat = state.get("vessel_lat", 13.08)
+        v_lon = state.get("vessel_lon", 80.27)
+
+        if "hyderabad" in combined_q or "హైదరాబాద్" in combined_q or "हैदराबाद" in combined_q:
+            en_text = (
+                "Hyderabad is an inland hub located in Telangana. The closest commercial seaports to Hyderabad are "
+                "Machilipatnam Port (~340 km east) and Krishnapatnam Port (~450 km southeast) in Andhra Pradesh, "
+                "followed by Chennai Port (~520 km south) on the Coromandel Coast, and Visakhapatnam Port (~600 km northeast)."
+            )
+            port_loc_map = {
+                "ta": "ஹைதராபாத் தெலங்கானாவில் உள்ள நிலப்பரப்பு நகரம் ஆகும். இதற்கு மிக அருகில் உள்ள கடல் துறைமுகங்கள்: ஆந்திராவில் உள்ள மசூலிப்பட்டினம் துறைமுகம் (~340 கி.மீ), கிருஷ்ணாப்பட்டினம் துறைமுகம் (~450 கி.மீ), மற்றும் சென்னை துறைமுகம் (~520 கி.மீ).",
+                "te": "హైదరాబాద్ తెలంగాణలోని అంతర్భాగ నగరం. హైదరాబాద్‌కు అత్యంత సమీపంలో ఉన్న ఓడరేవులు ఆంధ్రప్రదేశ్‌లోని మచిలీపట్నం పోర్ట్ (~340 కి.మీ), కృష్ణపట్నం పోర్ట్ (~450 కి.మీ), మరియు చెన్నై పోర్ట్ (~520 కి.మీ).",
+                "hi": "हैदराबाद तेलंगाना का एक अंतर्देशीय शहर है। हैदराबाद के सबसे नजदीकी प्रमुख समुद्री बंदरगाह आंध्र प्रदेश में मछलीपट्टनम बंदरगाह (~340 किमी) और कृष्णापट्टनम बंदरगाह (~450 किमी) हैं, इसके बाद चेन्नई बंदरगाह (~520 किमी) हैं।",
+                "en": en_text,
+            }
+        elif "chennai" in combined_q or "madras" in combined_q or "சென்னை" in combined_q or "चेन्नई" in combined_q:
+            en_text = (
+                "In the Chennai maritime sector, the primary ports are: 1) Chennai Port (major commercial & container harbor), "
+                "2) Kamarajar Port at Ennore (deepwater all-weather port, 20 km north), and 3) Chennai Kasimedu Fishing Harbor (active jetty with ice plants and fuel berths)."
+            )
+            port_loc_map = {
+                "ta": "சென்னை கடல் பகுதியில் உள்ள முக்கிய துறைமுகங்கள்: 1) சென்னை சர்வதேச துறைமுகம், 2) எண்ணூர் காமராஜர் துறைமுகம் (20 கி.மீ வடக்கு), மற்றும் 3) காசிமேடு மீன்பிடி துறைமுகம் ஆகும்.",
+                "te": "చెన్నై ప్రాంతంలోని ప్రధాన ఓడరేవులు: 1) చెన్నై కమర్షియల్ పోర్ట్, 2) కామరాజర్ పోర్ట్ (ఎన్నూర్), మరియు 3) కాసిమేడు ఫిషింగ్ హార్బర్.",
+                "hi": "चेन्नई क्षेत्र के प्रमुख बंदरगाह: 1) चेन्नई मुख्य कंटेनर बंदरगाह, 2) कामराजार पोर्ट (एन्नोर), और 3) कासिमेडू मत्स्य पालन बंदरगाह हैं।",
+                "en": en_text,
+            }
+        else:
+            # Calculate distance to all ports from current vessel position
+            scored_ports = []
+            for p in MAJOR_INDIAN_PORTS:
+                dist = _haversine_km(v_lat, v_lon, p["lat"], p["lon"])
+                scored_ports.append((dist, p))
+            scored_ports.sort(key=lambda x: x[0])
+            nearest_dist, nearest_port = scored_ports[0]
+
+            en_text = (
+                f"Nearest harbor to your vessel ({v_lat:.3f}°N, {v_lon:.3f}°E) is {nearest_port['name']} "
+                f"({nearest_port['state']}), located {nearest_dist:.1f} km away. Operational facility: {nearest_port['type']}."
+            )
+            port_loc_map = {
+                "ta": f"உங்கள் தற்போதைய படகு இருப்பிடத்திற்கு மிக அருகில் உள்ள துறைமுகம் {nearest_port['name']} ஆகும். இது {nearest_dist:.1f} கி.மீ தொலைவில் உள்ளது ({nearest_port['type']}).",
+                "te": f"మీ ప్రస్తుత నౌకకు అత్యంత సమీపంలోని రేవు {nearest_port['name']}, దూరం {nearest_dist:.1f} కి.మీ ({nearest_port['type']}).",
+                "hi": f"आपकी नाव की वर्तमान स्थिति से निकटतम बंदरगाह {nearest_port['name']} है, जो {nearest_dist:.1f} किमी की दूरी पर है ({nearest_port['type']})।",
+                "en": en_text,
+            }
+
+        state["english_response"] = en_text
+        state["localized_response"] = port_loc_map.get(lang, en_text)
+        state["quick_replies"] = ["Route to Nearest Port", "Weather at Port", "Check Border Distance"]
+        return state
+
+    # 3. Weather / Specific Location inquiry vs Composite Advisory
     w_data = state.get("weather_data") or {}
     wave = w_data.get("wave_height_m", 1.3)
     swell = w_data.get("swell_wave_height_m", 1.1)
@@ -69,15 +159,11 @@ def response_synthesizer_node(state: AgentState) -> AgentState:
     is_safe = w_data.get("is_safe_for_small_craft", True)
     loc_name = state.get("target_location_name")
 
-    raw_query = (state.get("raw_query") or "").lower()
-    trans_query = (state.get("translated_query") or "").lower()
-    combined_q = f"{raw_query} {trans_query}"
-
     is_weather_specific = (
-        loc_name is not None
-        or (
-            any(kw in combined_q for kw in ["weather", "wave", "wind", "swell", "sea", "வானிலை", "அலை", "காற்று", "मौसम", "हवा", "लहर"])
-            and not any(kw in combined_q for kw in ["pfz", "fish", "மீன்", "मछली", "border", "எல்லை", "सीमा"])
+        not is_port_inquiry
+        and (
+            any(kw in combined_q for kw in ["weather", "wave", "wind", "swell", "sea", "temp", "storm", "cyclone", "rain", "வானிலை", "அலை", "காற்று", "मौसम", "हवा", "लहर", "వర్షం", "గాలి", "వాతావరణం"])
+            or (loc_name is not None and not any(kw in combined_q for kw in ["port", "harbor", "route", "fish", "pfz", "border"]))
         )
     )
 
@@ -122,7 +208,7 @@ def response_synthesizer_node(state: AgentState) -> AgentState:
         state["quick_replies"] = ["Hourly Swell Forecast", "Nearest PFZ Zone", "Check Border Distance"]
         return state
 
-    # 3. Composite Safe Case (Default)
+    # 4. Composite Safe Case (Default)
     pfz_list = state.get("pfz_features") or []
     if pfz_list:
         top_pfz = pfz_list[0]

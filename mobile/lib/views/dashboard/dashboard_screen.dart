@@ -78,7 +78,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ChatMessageModel? _latestAdvisory;
 
   // Interactive Voice & Query Assistant State
-  String _lastCaptainQuery = 'Is there a storm alert? Where is the nearest PFZ?';
+  String _lastCaptainQuery = 'Where is the nearest port to Chennai?';
   DateTime _lastCaptainQueryTime = DateTime.now();
   final TextEditingController _queryInputController = TextEditingController();
   final VoiceRepository _voiceRepo = VoiceRepository();
@@ -2755,86 +2755,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.stitchSurfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            '00:00 / 00:14',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.stitchOnSurfaceVariant,
+                        InkWell(
+                          onTap: () async {
+                            HapticFeedback.selectionClick();
+                            if (_isPlayingAudio) {
+                              await _audioPlayer.stop();
+                              setState(() => _isPlayingAudio = false);
+                            } else {
+                              if (_latestAudioBase64 != null && _latestAudioBase64!.isNotEmpty) {
+                                await _audioPlayer.playBytesBase64(_latestAudioBase64!);
+                                setState(() => _isPlayingAudio = true);
+                              } else {
+                                await _synthesizeAndPlayAdvisory(advisoryTa);
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _isPlayingAudio ? AppColors.stitchSecondaryContainer : AppColors.stitchSurfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _isPlayingAudio ? Icons.stop_rounded : Icons.volume_up_rounded,
+                                  size: 14,
+                                  color: _isPlayingAudio ? AppColors.stitchSecondary : AppColors.stitchPrimary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _isPlayingAudio ? 'STOP' : 'LISTEN',
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: _isPlayingAudio ? AppColors.stitchSecondary : AppColors.stitchPrimary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-
-                    // Audio Player Controller Bar
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.stitchSurfaceContainerLow,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            iconSize: 22,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                            icon: Icon(
-                              _isPlayingAudio ? Icons.pause_circle_filled_rounded : Icons.play_circle_fill_rounded,
-                              color: AppColors.stitchPrimary,
-                            ),
-                            onPressed: () async {
-                              HapticFeedback.selectionClick();
-                              if (_isPlayingAudio) {
-                                await _audioPlayer.stop();
-                                setState(() => _isPlayingAudio = false);
-                              } else {
-                                if (_latestAudioBase64 != null && _latestAudioBase64!.isNotEmpty) {
-                                  await _audioPlayer.playBytesBase64(_latestAudioBase64!);
-                                  setState(() => _isPlayingAudio = true);
-                                } else {
-                                  await _synthesizeAndPlayAdvisory(advisoryTa);
-                                }
-                              }
-                            },
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(3),
-                              child: SizedBox(
-                                height: 6,
-                                child: LinearProgressIndicator(
-                                  value: 0.35,
-                                  backgroundColor: AppColors.stitchOutlineVariant.withOpacity(0.5),
-                                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.stitchPrimary),
-                                ),
+                    if (_isPlayingAudio)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.stitchSecondary,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.stitchSurfaceContainer,
-                              borderRadius: BorderRadius.circular(4),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Playing Bhashini voice synthesis audio...',
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.stitchSecondary),
                             ),
-                            child: const Text(
-                              '1.0x',
-                              style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w800, color: AppColors.stitchOnSurfaceVariant),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 10),
 
                     // Verbatim Advisory Text

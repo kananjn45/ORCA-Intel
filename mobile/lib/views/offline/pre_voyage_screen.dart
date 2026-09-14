@@ -564,7 +564,15 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
               children: [
                 Expanded(
                   child: InkWell(
-                    onTap: () => setState(() => _isGpsAuto = true),
+                    onTap: () {
+                      setState(() {
+                        _isGpsAuto = true;
+                        if (widget.currentSectorName != null) {
+                          _selectedSector = CoastalSector.findByName(widget.currentSectorName!);
+                          widget.onSectorChanged?.call(_selectedSector);
+                        }
+                      });
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -633,27 +641,108 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
+
+          // Dynamic Mode Banner explaining the active mode
+          if (_isGpsAuto)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.stitchSecondaryContainer.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.stitchSecondary.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.stitchSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'HARDWARE GNSS ACTIVE • Automatically locked to vessel telemetry coordinates.',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.stitchOnSecondaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.stitchPrimaryFixed.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.stitchPrimary.withOpacity(0.3)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.tune_rounded, size: 14, color: AppColors.stitchPrimary),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'MANUAL PORT OVERRIDE • Select any coastal base across India to plan voyage & cache maps.',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.stitchPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 12),
 
           // Departure Sector Selector Label (Test Invariant: 'SELECT DEPARTURE SECTOR')
-          const Text(
-            'SELECT DEPARTURE SECTOR',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: AppColors.stitchOnSurfaceVariant,
-              letterSpacing: 0.8,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'SELECT DEPARTURE SECTOR',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.stitchOnSurfaceVariant,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: _isGpsAuto ? AppColors.stitchSecondaryContainer : AppColors.stitchPrimaryFixed.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  _isGpsAuto ? 'GNSS AUTO-LOCKED' : 'MANUAL OVERRIDE',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    color: _isGpsAuto ? AppColors.stitchSecondary : AppColors.stitchPrimary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
 
-          // Coastal Sector Dropdown
+          // Coastal Sector Dropdown (Always present and interactive)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             decoration: BoxDecoration(
               color: AppColors.stitchSurfaceContainerLowest,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.stitchOutlineVariant),
+              border: Border.all(color: _isGpsAuto ? AppColors.stitchOutlineVariant : AppColors.stitchPrimary),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<CoastalSector>(
@@ -689,7 +778,10 @@ class _PreVoyageScreenState extends State<PreVoyageScreen> {
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) {
-                    setState(() => _selectedSector = val);
+                    setState(() {
+                      _selectedSector = val;
+                      _isGpsAuto = false; // user manually picked a port
+                    });
                     widget.onSectorChanged?.call(val);
                   }
                 },

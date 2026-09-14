@@ -67,6 +67,9 @@ class _MarineMapViewState extends State<MarineMapView>
   bool _layerHazards = true;
   bool _layerImbl = true;
 
+  // Camera tracking mode: if true, camera locks to vessel updates; if false, user can freely pan/explore anywhere
+  bool _followVessel = true;
+
   @override
   void initState() {
     super.initState();
@@ -80,9 +83,10 @@ class _MarineMapViewState extends State<MarineMapView>
   @override
   void didUpdateWidget(covariant MarineMapView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.telemetry.latitude != widget.telemetry.latitude ||
-        oldWidget.telemetry.longitude != widget.telemetry.longitude) {
-      // Re-center smoothly if position changes noticeably
+    if (_followVessel &&
+        (oldWidget.telemetry.latitude != widget.telemetry.latitude ||
+            oldWidget.telemetry.longitude != widget.telemetry.longitude)) {
+      // Re-center smoothly only when vessel tracking is engaged
       _mapController.move(
         LatLng(widget.telemetry.latitude, widget.telemetry.longitude),
         _mapController.camera.zoom,
@@ -99,6 +103,7 @@ class _MarineMapViewState extends State<MarineMapView>
 
   void _recenterOnVessel() {
     HapticFeedback.lightImpact();
+    setState(() => _followVessel = true);
     final target = LatLng(widget.telemetry.latitude, widget.telemetry.longitude);
     _mapController.move(target, 11.0);
     widget.onRecenterTap?.call();
@@ -398,6 +403,11 @@ class _MarineMapViewState extends State<MarineMapView>
             minZoom: 5.0,
             maxZoom: 17.0,
             backgroundColor: widget.isDarkMode ? AppColors.brandNavy : const Color(0xFFE2E8F0),
+            onPositionChanged: (MapPosition position, bool hasGesture) {
+              if (hasGesture && _followVessel) {
+                setState(() => _followVessel = false);
+              }
+            },
           ),
           children: [
             // OpenStreetMap Tile Layer (Dark oceanic filter in night mode, clean daylight in deck mode)
@@ -1103,11 +1113,11 @@ class _MarineMapViewState extends State<MarineMapView>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Recenter on Vessel GPS
+              // Recenter on Vessel GPS (dynamic indicator)
               _buildFloatingToolButton(
-                icon: Icons.my_location_rounded,
-                iconColor: AppColors.stitchPrimary,
-                tooltip: 'Center GPS',
+                icon: _followVessel ? Icons.my_location_rounded : Icons.location_searching_rounded,
+                iconColor: _followVessel ? AppColors.stitchSecondary : AppColors.stitchPrimary,
+                tooltip: _followVessel ? 'Vessel Locked' : 'Recenter on Vessel',
                 onTap: _recenterOnVessel,
               ),
               const SizedBox(height: 6),
