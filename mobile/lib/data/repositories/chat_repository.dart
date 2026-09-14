@@ -25,6 +25,27 @@ class ChatRepository {
     required TelemetryModel telemetry,
     required String languageCode,
   }) async {
+    final lower = query.toLowerCase();
+
+    // Check for Port & Harbor inquiries upfront to guarantee accurate port intelligence
+    final isPortQuery = lower.contains('port') ||
+        lower.contains('harbor') ||
+        lower.contains('harbour') ||
+        lower.contains('jetty') ||
+        lower.contains('berth') ||
+        lower.contains('dock') ||
+        lower.contains('துறைமுகம்') ||
+        lower.contains('बंदरगाह') ||
+        lower.contains('ரேவு');
+
+    if (isPortQuery) {
+      return await _generateContextualLiveReply(
+        query: query,
+        telemetry: telemetry,
+        languageCode: languageCode,
+      );
+    }
+
     final sessionId = 'ses-${DateTime.now().millisecondsSinceEpoch}-${math.Random().nextInt(9999)}';
 
     try {
@@ -122,13 +143,51 @@ class ChatRepository {
                     ? 'चेन्नई क्षेत्र के प्रमुख बंदरगाह: चेन्नई मुख्य कंटेनर बंदरगाह, कामराजार पोर्ट (एन्नोर), और कासिमेडू मत्स्य पालन बंदरगाह हैं।'
                     : enAdvisory));
       } else {
-        enAdvisory = 'Nearest operational coastal base to current vessel coordinates (${telemetry.latitude.toStringAsFixed(2)}°N, ${telemetry.longitude.toStringAsFixed(2)}°E) is Chennai Kasimedu Fishing Harbor (Jetty 2, 2.4 km away). Safe approach channel open.';
+        final ports = [
+          {'name': 'Chennai Kasimedu Fishing Harbor', 'lat': 13.125, 'lon': 80.298},
+          {'name': 'Chennai Port (Major Harbor)', 'lat': 13.084, 'lon': 80.298},
+          {'name': 'Kamarajar Port (Ennore)', 'lat': 13.250, 'lon': 80.330},
+          {'name': 'Krishnapatnam Port', 'lat': 14.250, 'lon': 80.120},
+          {'name': 'Machilipatnam Port', 'lat': 16.180, 'lon': 81.150},
+          {'name': 'Visakhapatnam Port', 'lat': 17.690, 'lon': 83.290},
+          {'name': 'Nagapattinam Port', 'lat': 10.760, 'lon': 79.850},
+          {'name': 'Rameswaram Fishing Harbor', 'lat': 9.288, 'lon': 79.313},
+          {'name': 'Tuticorin V.O.C. Port', 'lat': 8.750, 'lon': 78.180},
+          {'name': 'Kanyakumari Harbor', 'lat': 8.080, 'lon': 77.550},
+          {'name': 'Cochin Port', 'lat': 9.960, 'lon': 76.260},
+          {'name': 'New Mangalore Port', 'lat': 12.930, 'lon': 74.810},
+          {'name': 'Mumbai Port Trust (MbPT)', 'lat': 18.940, 'lon': 72.850},
+        ];
+
+        double minDistance = double.infinity;
+        Map<String, Object> closestPort = ports.first;
+
+        for (final p in ports) {
+          final pLat = p['lat'] as double;
+          final pLon = p['lon'] as double;
+          final dLat = (pLat - telemetry.latitude) * math.pi / 180.0;
+          final dLon = (pLon - telemetry.longitude) * math.pi / 180.0;
+          final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+              math.cos(telemetry.latitude * math.pi / 180.0) *
+                  math.cos(pLat * math.pi / 180.0) *
+                  math.sin(dLon / 2) *
+                  math.sin(dLon / 2);
+          final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+          final distKm = 6371.0 * c;
+          if (distKm < minDistance) {
+            minDistance = distKm;
+            closestPort = p;
+          }
+        }
+
+        final distNm = minDistance / 1.852;
+        enAdvisory = 'Nearest operational port to current vessel coordinates (${telemetry.latitude.toStringAsFixed(2)}°N, ${telemetry.longitude.toStringAsFixed(2)}°E) is ${closestPort["name"]} at ${minDistance.toStringAsFixed(1)} km (${distNm.toStringAsFixed(1)} NM). Safe approach channel is open.';
         locAdvisory = languageCode == 'ta'
-            ? 'உங்கள் படகிற்கு மிக அருகில் உள்ள துறைமுகம் சென்னை காசிமேடு மீன்பிடி துறைமுகம் (2.4 கி.மீ). பாதுகாப்பான படகுப்பாதை திறந்துள்ளது.'
+            ? 'தங்கள் படகிற்கு மிக அருகில் உள்ள துறைமுகம்: ${closestPort["name"]} (${minDistance.toStringAsFixed(1)} கி.மீ / ${distNm.toStringAsFixed(1)} கடல் மைல்). படகுப்பாதை பாதுகாப்பாக உள்ளது.'
             : (languageCode == 'te'
-                ? 'మీ నౌకకు సమీపంలోని రేవు చెన్నై కాసిమేడు ఫిషింగ్ హార్బర్ (2.4 కి.మీ).'
+                ? 'మీ నౌకకు సమీపంలోని ఓడరేవు ${closestPort["name"]} (${minDistance.toStringAsFixed(1)} కి.మీ).'
                 : (languageCode == 'hi'
-                    ? 'आपकी नाव के निकटतम बंदरगाह चेन्नई कासिमेडू मत्स्य पालन बंदरगाह (2.4 किमी) है।'
+                    ? 'आपकी नाव के निकटतम बंदरगाह ${closestPort["name"]} (${minDistance.toStringAsFixed(1)} किमी) है।'
                     : enAdvisory));
       }
 

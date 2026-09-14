@@ -78,7 +78,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ChatMessageModel? _latestAdvisory;
 
   // Interactive Voice & Query Assistant State
-  String _lastCaptainQuery = 'Where is the nearest port to Chennai?';
+  String? _lastCaptainQuery;
   DateTime _lastCaptainQueryTime = DateTime.now();
   final TextEditingController _queryInputController = TextEditingController();
   final VoiceRepository _voiceRepo = VoiceRepository();
@@ -2648,68 +2648,116 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Captain Query Bubble
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.stitchPrimaryFixed.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.stitchOutlineVariant, width: 0.8),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: const BoxDecoration(
-                        color: AppColors.stitchPrimary,
-                        shape: BoxShape.circle,
+              // Captain Query Bubble or Initial Welcoming Prompt
+              if (_lastCaptainQuery != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.stitchPrimaryFixed.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.stitchOutlineVariant, width: 0.8),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: const BoxDecoration(
+                          color: AppColors.stitchPrimary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.person_rounded, size: 16, color: Colors.white),
+                        ),
                       ),
-                      child: const Center(
-                        child: Icon(Icons.person_rounded, size: 16, color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'CAPTAIN QUERY',
-                                style: TextStyle(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.stitchPrimary,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'CAPTAIN QUERY',
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.stitchPrimary,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '${_lastCaptainQueryTime.hour.toString().padLeft(2, '0')}:${_lastCaptainQueryTime.minute.toString().padLeft(2, '0')} IST',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: isDark ? AppColors.textMuted : AppColors.stitchOutline,
+                                Text(
+                                  '${_lastCaptainQueryTime.hour.toString().padLeft(2, '0')}:${_lastCaptainQueryTime.minute.toString().padLeft(2, '0')} IST',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    color: isDark ? AppColors.textMuted : AppColors.stitchOutline,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            _lastCaptainQuery,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.inkLight : AppColors.stitchOnSurface,
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 3),
+                            Text(
+                              _lastCaptainQuery!,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? AppColors.inkLight : AppColors.stitchOnSurface,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF09293A) : AppColors.stitchSurfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.stitchOutlineVariant, width: 0.8),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: AppColors.stitchPrimaryFixed.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.mic_none_rounded, size: 18, color: AppColors.stitchPrimary),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'ORCA VOICE COPILOT READY',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                                color: AppColors.stitchPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Tap the mic below or type a query. Try: "Nearest port to Chennai", "Nearest port to Hyderabad", or "Sea Waves".',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isDark ? AppColors.textMuted : AppColors.stitchOnSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               const SizedBox(height: 12),
 
               // AI Advisory Synthesis Card (Required for tests: 'ORCA INTELLIGENCE AGENT')
